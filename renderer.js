@@ -184,9 +184,6 @@ export const renderer = (()=>{
             y: 2/gameSize.height
         };
 
-        // componentsManager.getComponentById('fish1').rotation+=0.004
-        componentsManager.getComponentById('fish2').rotation-=0.04
-        componentsManager.getComponentById('fish3').scale+=0.001
         root.children?.forEach(children => {
             
             recursiveDrawComponent(children);
