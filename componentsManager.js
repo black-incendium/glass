@@ -26,7 +26,6 @@ export const componentsManager = (()=>{
 
             if (components[elementName] != undefined) return; //! warn
 
-            components[elementName] = parentNode.children[elementName];
             children.push(parentNode.children[elementName]);
             parentNode.children[elementName].parent = parentNode;
             parentNode.children[elementName].id = elementName;
@@ -50,6 +49,8 @@ export const componentsManager = (()=>{
         });
 
         object.children = object.children.map(child => recursiveSetupComponent(child));
+
+        components[object.id] = object;
         
         return object;
     }
