@@ -37,18 +37,18 @@ export const componentsManager = (()=>{
         parentNode.children = children;
     }
 
-    function recursiveSetupComponent(componentData) {
+    function recursiveSetupComponent(componentData, parent) {
 
         let object;
-        if (componentData.type == 'container') object = componentCreator.newContainer(componentData);
-        if (componentData.type == 'sprite') object = componentCreator.newSprite(componentData);
+        if (componentData.type == 'container') object = componentCreator.newContainer(componentData, parent);
+        if (componentData.type == 'sprite') object = componentCreator.newSprite(componentData, parent);
 
         Object.defineProperty(object, 'type', {
 
             writable: false
         });
 
-        object.children = object.children.map(child => recursiveSetupComponent(child));
+        object.children = object.children.map(child => recursiveSetupComponent(child, object));
 
         components[object.id] = object;
         

@@ -1,48 +1,81 @@
 export const componentCreator = (()=>{
 
-    function newContainer(componentData) {
-
-        if (componentData == undefined) debugger
+    function newContainer(componentData, parentArg) {
 
         let x = componentData?.x ?? 0;
         let y = componentData?.y ?? 0;
         let scaleX = componentData?.scaleX ?? componentData?.scale ?? 1;
         let scaleY = componentData?.scaleY ?? componentData?.scale ?? 1;
         let rotation = (componentData?.rotation ?? 0)/360*2*Math.PI;
+        let alpha = componentData?.alpha ?? 1;
+
+        let parent = parentArg;
         let children = componentData?.children ?? [];
         let id = componentData.id;
 
         function getX() {
+
             return x;
         }
 
         function setX(value) {
+
             x = value;
         }
 
         function getY() {
+
             return y;
         }
 
         function setY(value) {
+
             y = value;
         }
 
         function getScale() {
+
             return {x: scaleX, y: scaleY};
         }
 
         function setScaleXY(x, y) {
+
             scaleX = x;
             scaleY = y;
         }
 
         function getRotation() {
+
             return rotation/(2*Math.PI)*360;
         }
 
         function setRotation(value) {
+
             rotation = value/360*2*Math.PI;
+        }
+
+        function getAlpha() {
+
+            return alpha;
+        }
+
+        function setAlpha(value) {
+
+            alpha = value;
+        }
+
+        function getParent() {
+
+            return parent;
+        }
+
+        function getTotalAlpha() {
+
+            const parentTotalAlpha = getParent()?.getAlpha?.() ?? 1;
+            const p = getParent();
+            const a = p.getAlpha?.();
+
+            return getAlpha()*parentTotalAlpha;
         }
 
         return {
@@ -55,16 +88,20 @@ export const componentCreator = (()=>{
             setScaleXY,
             getRotation,
             setRotation,
-            
+            getAlpha,
+            setAlpha,
+            getParent,
+            getTotalAlpha,
+
             id,
             type: 'container',
             children
         }
     }
 
-    function newSprite(componentData) {
+    function newSprite(componentData, parent) {
 
-        const baseObject = newContainer(componentData);
+        const baseObject = newContainer(componentData, parent);
 
         const assets = componentData?.assets ?? [];
         const curretAssetIndex = componentData?.assetIndex ?? 0;

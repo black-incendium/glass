@@ -9,6 +9,7 @@ export const renderer = (()=>{
 
     let gl;
     let matrixLocation;
+    let opacityLocation;
     let textureLocation;
     let root;
     let gameSize;
@@ -49,11 +50,12 @@ export const renderer = (()=>{
         in vec2 v_texcoord;
 
         uniform sampler2D u_texture;
+        uniform float u_opacity;
 
         out vec4 outColor;
 
         void main() {
-            outColor = texture(u_texture, v_texcoord);
+            outColor = vec4(texture(u_texture, v_texcoord).xyz, u_opacity);
         }
         `;
 
@@ -65,6 +67,7 @@ export const renderer = (()=>{
         const texcoordAttributeLocation = gl.getAttribLocation(program, "a_texcoord");
 
         matrixLocation = gl.getUniformLocation(program, "u_matrix");
+        opacityLocation = gl.getUniformLocation(program, "u_opacity");
         textureLocation = gl.getUniformLocation(program, "u_texture");
 
         const vao = gl.createVertexArray();
@@ -81,7 +84,6 @@ export const renderer = (()=>{
             1, 1,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
         gl.enableVertexAttribArray(positionAttributeLocation);
         gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
@@ -98,6 +100,9 @@ export const renderer = (()=>{
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
         gl.enableVertexAttribArray(texcoordAttributeLocation);
         gl.vertexAttribPointer(texcoordAttributeLocation, 2, gl.FLOAT, true, 0, 0);
+
+        gl.enable( gl.BLEND );
+        gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
     }
 
     function recursiveDrawComponent(component) {
@@ -134,6 +139,7 @@ export const renderer = (()=>{
             gl.activeTexture(gl.TEXTURE0 + textureUnit);
             gl.bindTexture(gl.TEXTURE_2D, textureInfo.texture);
 
+            gl.uniform1f(opacityLocation, component.getTotalAlpha());
 
             gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
                 m3.getScalingMatrix(textureInfo.width, textureInfo.height), 
