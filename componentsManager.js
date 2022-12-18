@@ -59,10 +59,11 @@ export const componentsManager = (()=>{
         let y = componentData?.y ?? 0;
         let scaleX = componentData?.scaleX ?? componentData?.scale ?? 1;
         let scaleY = componentData?.scaleY ?? componentData?.scale ?? 1;
-        let rotation = componentData?.rotation ?? 0;
+        let rotation = (componentData?.rotation ?? 0)/360*2*Math.PI;
         let assets = componentData?.assets ?? [];
         let type = componentData?.type ?? 'container';
         let children = componentData.children ?? [];
+        let id = componentData.id;
 
         return {
 
@@ -97,6 +98,10 @@ export const componentsManager = (()=>{
 
             set rotation(value) {
                 rotation = value/360*2*Math.PI;
+            },
+
+            get id() {
+                return id
             },
 
             type,

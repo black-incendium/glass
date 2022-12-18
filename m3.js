@@ -75,7 +75,7 @@ export const m3 = (()=>{
 
         return multiplyMatrices([
 
-            getOriginRotationMatrix(transformationObject.rotation.angle),
+            getOriginRotationMatrix(transformationObject.rotation.angle/360*2*Math.PI),
             getScalingMatrix(transformationObject.scaling.x, transformationObject.scaling.y),
             getTranslationMatrix(transformationObject.translation.x, transformationObject.translation.y),
             transformationObject.currentMatrix,
