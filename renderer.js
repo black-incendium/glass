@@ -3,6 +3,7 @@ import { m3 } from './m3.js';
 import { assetsManager } from "./assetsManager.js";
 import { gameState } from './gameState.js';
 import { componentsManager } from './componentsManager.js';
+import { resizeManager } from './resizeManager.js';
 
 export const renderer = (()=>{
 
@@ -10,14 +11,14 @@ export const renderer = (()=>{
     let matrixLocation;
     let textureLocation;
     let root;
-    let textureInfo;
+    let gameSize;
+    let gameToClipSpaceScaleData;
     let matrixStack = [];
 
     function initialize(data) {
 
         gl = data.gl;
         setupProgram();
-        textureInfo = assetsManager.getAssetDataByName('test');
     }
 
     function setupProgram() {
@@ -137,7 +138,8 @@ export const renderer = (()=>{
             gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
                 m3.getScalingMatrix(textureInfo.width, textureInfo.height), 
                 componentTransformationsMatrix,
-                m3.multiplyTwoMatrices(m3.getScalingMatrix(2/2000, 2/2000),m3.getTranslationMatrix(-1,-1)),
+                m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
+                m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
             ]));
             // if (Math.random()>0.995) {
             //     console.log(`
@@ -167,12 +169,22 @@ export const renderer = (()=>{
 
     function render(time) {
 
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        componentsManager.getComponentById('fish1').rotation+=0.004
+        const canvasSize = resizeManager.getCanvasSize();
+        gameSize = gameState.getGameSize();
+        gameToClipSpaceScaleData = canvasSize.width/canvasSize.height < gameSize.width/gameSize.height ? {
+
+            x: 2/gameSize.width,
+            y: 2/gameSize.width * canvasSize.width/canvasSize.height
+        } : {
+
+            x: 2/gameSize.height * canvasSize.height/canvasSize.width,
+            y: 2/gameSize.height
+        };
+
+        // componentsManager.getComponentById('fish1').rotation+=0.004
         componentsManager.getComponentById('fish2').rotation-=0.04
         componentsManager.getComponentById('fish3').scale+=0.001
         root.children?.forEach(children => {

@@ -2,20 +2,19 @@ import { assetsManager } from './assetsManager.js';
 import { componentsManager } from './componentsManager.js';
 import { gameState } from './gameState.js';
 import { renderer } from './renderer.js';
+import { resizeManager } from './resizeManager.js';
 
 /** description */
 
 function initialize(data) {
 
-    const canvas = document.querySelector("canvas");
-    const gl = canvas.getContext("webgl2");
+    const canvas = data.canvas;
+    const gl = data.gl;
     if (!gl) {
         return;
     }
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
+    resizeManager.initialize({canvas, gl})
     gameState.initialize(data.gameData);
     componentsManager.initialize(data.layoutData);
     assetsManager.initialize({gl, assetsData: data.assetsData});
