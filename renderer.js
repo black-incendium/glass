@@ -114,8 +114,8 @@ export const renderer = (()=>{
 
             scaling: {
 
-                x: component.scale,
-                y: component.scale,
+                x: component.scale.x,
+                y: component.scale.y,
             },
 
             rotation: {
@@ -184,6 +184,7 @@ export const renderer = (()=>{
             y: 2/gameSize.height
         };
 
+        // debugger
         root.children?.forEach(children => {
             
             recursiveDrawComponent(children);
