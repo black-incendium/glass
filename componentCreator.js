@@ -12,41 +12,50 @@ export const componentCreator = (()=>{
         let children = componentData?.children ?? [];
         let id = componentData.id;
 
+        function getX() {
+            return x;
+        }
+
+        function setX(value) {
+            x = value;
+        }
+
+        function getY() {
+            return y;
+        }
+
+        function setY(value) {
+            y = value;
+        }
+
+        function getScale() {
+            return {x: scaleX, y: scaleY};
+        }
+
+        function setScaleXY(x, y) {
+            scaleX = x;
+            scaleY = y;
+        }
+
+        function getRotation() {
+            return rotation/(2*Math.PI)*360;
+        }
+
+        function setRotation(value) {
+            rotation = value/360*2*Math.PI;
+        }
+
         return {
 
-            getX() {
-                return x;
-            },
-
-            setX(value) {
-                x = value;
-            },
-
-            getY() {
-                return y;
-            },
-
-            setY(value) {
-                y = value;
-            },
-
-            getScale() {
-                return {x: scaleX, y: scaleY};
-            },
-
-            setScaleXY(x, y) {
-                scaleX = x;
-                scaleY = y;
-            },
-
-            getRotation() {
-                return rotation/(2*Math.PI)*360;
-            },
-
-            setRotation(value) {
-                rotation = value/360*2*Math.PI;
-            },
-
+            getX,
+            setX,
+            getY,
+            setY,
+            getScale,
+            setScaleXY,
+            getRotation,
+            setRotation,
+            
             id,
             type: 'container',
             children
