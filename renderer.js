@@ -108,25 +108,25 @@ export const renderer = (()=>{
 
             translation: {
 
-                x: component.x,
-                y: component.y,
+                x: component.getX(),
+                y: component.getY(),
             },
 
             scaling: {
 
-                x: component.scale.x,
-                y: component.scale.y,
+                x: component.getScale().x,
+                y: component.getScale().y,
             },
 
             rotation: {
 
-                angle: component.rotation
+                angle: component.getRotation()
             }
         });
 
         if (component.type == 'sprite') {
 
-            let textureInfo = assetsManager.getAssetDataByName(component.assets[0]);
+            let textureInfo = assetsManager.getAssetDataByName(component.getCurrentAssetName());
 
             const textureUnit = 0;
             gl.uniform1i(textureLocation, textureUnit);
@@ -184,7 +184,6 @@ export const renderer = (()=>{
             y: 2/gameSize.height
         };
 
-        // debugger
         root.children?.forEach(children => {
             
             recursiveDrawComponent(children);

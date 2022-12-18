@@ -2,35 +2,35 @@ export const componentCreator = (()=>{
 
     function newContainer(componentData) {
 
+        if (componentData == undefined) debugger
+
         let x = componentData?.x ?? 0;
         let y = componentData?.y ?? 0;
         let scaleX = componentData?.scaleX ?? componentData?.scale ?? 1;
         let scaleY = componentData?.scaleY ?? componentData?.scale ?? 1;
         let rotation = (componentData?.rotation ?? 0)/360*2*Math.PI;
-        let assets = componentData?.assets ?? [];
-        let type = componentData?.type ?? 'container';
-        let children = componentData.children ?? [];
+        let children = componentData?.children ?? [];
         let id = componentData.id;
 
         return {
 
-            get x() {
+            getX() {
                 return x;
             },
 
-            set x(value) {
+            setX(value) {
                 x = value;
             },
 
-            get y() {
+            getY() {
                 return y;
             },
 
-            set y(value) {
+            setY(value) {
                 y = value;
             },
 
-            get scale() {
+            getScale() {
                 return {x: scaleX, y: scaleY};
             },
 
@@ -39,27 +39,36 @@ export const componentCreator = (()=>{
                 scaleY = y;
             },
 
-            get rotation() {
+            getRotation() {
                 return rotation/(2*Math.PI)*360;
             },
 
-            set rotation(value) {
+            setRotation(value) {
                 rotation = value/360*2*Math.PI;
             },
 
-            get id() {
-                return id
-            },
-
-            type,
-
+            id,
+            type: 'container',
             children
         }
     }
 
-    function newSprite(baseObject, componentData) {
+    function newSprite(componentData) {
 
-        const assets = componentData.assets;
+        const baseObject = newContainer(componentData);
+
+        const assets = componentData?.assets ?? [];
+        const curretAssetIndex = componentData?.assetIndex ?? 0;
+
+        function getCurrentAssetName() {
+
+            return assets[curretAssetIndex];
+        }
+
+        function setAssetIndex(value) {
+
+            curretAssetIndex = value;
+        }
 
         return {
 
@@ -67,12 +76,11 @@ export const componentCreator = (()=>{
 
             type: 'sprite',
 
-            get assets() {
-                return assets;
-            },
+            getCurrentAssetName,
+            setAssetIndex
         }
     }
-    
+
     return {
 
         newContainer,

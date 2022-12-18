@@ -3,7 +3,7 @@ import { componentCreator } from "./componentCreator.js";
 
 export const componentsManager = (()=>{
 
-    let gameContainer = {id:"gameContainer"};
+    let gameContainer = {id:"gameContainer", type:'container'};
     let components = {};
 
     function initialize(layoutData) {
@@ -39,9 +39,9 @@ export const componentsManager = (()=>{
 
     function recursiveSetupComponent(componentData) {
 
-        let object = componentCreator.newContainer(componentData);
-
-        if (object.type == 'sprite') object = componentCreator.newSprite(object, componentData);
+        let object;
+        if (componentData.type == 'container') object = componentCreator.newContainer(componentData);
+        if (componentData.type == 'sprite') object = componentCreator.newSprite(componentData);
 
         Object.defineProperty(object, 'type', {
 
