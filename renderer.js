@@ -147,16 +147,6 @@ export const renderer = (()=>{
                 m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
                 m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
             ]));
-            // if (Math.random()>0.995) {
-            //     console.log(`
-            //         element ${component.id}
-            //         width: ${textureInfo.width}
-            //         height: ${textureInfo.height}
-            //     `);
-
-            //     console.log(m3.multiplyTwoMatrices(m3.getScalingMatrix(2/2000, 2/2000),m3.getTranslationMatrix(-1,-1)))
-            //     console.log(componentTransformationsMatrix)
-            // }
 
             const offset = 0;
             const count = 6;
