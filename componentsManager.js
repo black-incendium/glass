@@ -29,7 +29,6 @@ export const componentsManager = (()=>{
             children.push(parentNode.children[elementName]);
             parentNode.children[elementName].parent = parentNode;
             parentNode.children[elementName].id = elementName;
-            parentNode.children[elementName].type ??= 'container'
 
             recursiveParseComponentsTreeNode(parentNode.children[elementName]);
         }
@@ -40,8 +39,17 @@ export const componentsManager = (()=>{
     function recursiveSetupComponent(componentData, parent) {
 
         let object;
-        if (componentData.type == 'container') object = componentCreator.newContainer(componentData, parent);
+
+        componentData?.children?.forEach?.(child => {
+
+            for (let key of Object.getOwnPropertyNames(componentData?.childrenCommonProperties ?? {})) {
+                child[key] = child[key] ?? componentData?.childrenCommonProperties[key];
+            }
+        });
+        console.log(componentData)
+
         if (componentData.type == 'sprite') object = componentCreator.newSprite(componentData, parent);
+        if (componentData.type == 'container' || componentData.type == undefined) object = componentCreator.newContainer(componentData, parent);
 
         Object.defineProperty(object, 'type', {
 
