@@ -46,7 +46,6 @@ export const componentsManager = (()=>{
                 child[key] = child[key] ?? componentData?.childrenCommonProperties[key];
             }
         });
-        console.log(componentData)
 
         if (componentData.type == 'sprite') object = componentCreator.newSprite(componentData, parent);
         if (componentData.type == 'container' || componentData.type == undefined) object = componentCreator.newContainer(componentData, parent);
