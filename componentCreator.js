@@ -74,9 +74,7 @@ export const componentCreator = (()=>{
 
         function getTotalAlpha() {
 
-            const parentTotalAlpha = getParent()?.getAlpha?.() ?? 1;
-            const p = getParent();
-            const a = p.getAlpha?.();
+            const parentTotalAlpha = getParent()?.getTotalAlpha?.() ?? 1;
 
             return getAlpha()*parentTotalAlpha;
         }
