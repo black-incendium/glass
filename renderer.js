@@ -78,10 +78,8 @@ export const renderer = (()=>{
         const positions = [
             0, 0,
             0, 1,
-            1, 0,
-            1, 0,
-            0, 1,
             1, 1,
+            1, 0,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
         gl.enableVertexAttribArray(positionAttributeLocation);
@@ -92,10 +90,8 @@ export const renderer = (()=>{
         const texcoords = [
             0, 0,
             0, 1,
-            1, 0,
-            1, 0,
-            0, 1,
             1, 1,
+            1, 0,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
         gl.enableVertexAttribArray(texcoordAttributeLocation);
@@ -129,7 +125,68 @@ export const renderer = (()=>{
             }
         });
 
+        const componentMaskTransformationsMatrix = m3.getComponentTransformationsMatrix({
+
+            currentMatrix: matrixStack[matrixStack.length - 1],
+
+            translation: {
+
+                x: component.getMask().x,
+                y: component.getMask().y,
+            },
+
+            scaling: {
+
+                x: 1,
+                y: 1,
+            },
+
+            rotation: {
+
+                angle: 0
+            }
+        });
+
         if (component.type == 'sprite') {
+
+            if (component.getMask().maskOn === true) {
+
+                gl.enable(gl.STENCIL_TEST);
+
+                gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+
+                gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+                gl.stencilMask(0xff);
+                // gl.depthMask(false);
+                gl.colorMask(false, false, false, false);
+
+                let textureInfo = assetsManager.getAssetDataByName('maskAsset');
+
+                const textureUnit = 0;
+                gl.uniform1i(textureLocation, textureUnit);
+
+                gl.activeTexture(gl.TEXTURE0 + textureUnit);
+                gl.bindTexture(gl.TEXTURE_2D, textureInfo.texture);
+
+                gl.uniform1f(opacityLocation, 1.0);
+
+                gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
+                    m3.getScalingMatrix(component.getMask().width, component.getMask().height), 
+                    componentMaskTransformationsMatrix,
+                    m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
+                    m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
+                ]));
+
+                const offset = 0;
+                const count = 4;
+                gl.drawArrays(gl.TRIANGLE_FAN, offset, count);
+                // gl.depthMask(true);
+                gl.colorMask(true, true, true, true);
+            }
+
+            gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+            gl.stencilFunc(gl.EQUAL, 1, 0xff);
+            gl.stencilMask(0x00);
 
             let textureInfo = assetsManager.getAssetDataByName(component.getCurrentAssetName());
 
@@ -149,8 +206,10 @@ export const renderer = (()=>{
             ]));
 
             const offset = 0;
-            const count = 6;
-            gl.drawArrays(gl.TRIANGLES, offset, count);
+            const count = 4;
+            gl.drawArrays(gl.TRIANGLE_FAN, offset, count);
+
+            gl.disable(gl.STENCIL_TEST);
         }
 
         matrixStack.push(componentTransformationsMatrix);
@@ -166,7 +225,7 @@ export const renderer = (()=>{
     function render(time) {
 
         gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
         const canvasSize = resizeManager.getCanvasSize();
         gameSize = gameState.getGameSize();

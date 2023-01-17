@@ -8,6 +8,9 @@ export const componentCreator = (()=>{
         let scaleY = componentData?.scaleY ?? componentData?.scale ?? 1;
         let rotation = (componentData?.rotation ?? 0)/360*2*Math.PI;
         let alpha = componentData?.alpha ?? 1;
+        let maskOn = componentData?.mask !== undefined ? true : false;
+        let mask = componentData?.mask ?? {x:0,y:0,width:0,height:0}
+        mask.maskOn = maskOn;
 
         let parent = parentArg;
         let children = componentData?.children ?? [];
@@ -78,6 +81,16 @@ export const componentCreator = (()=>{
             return getAlpha()*parentTotalAlpha;
         }
 
+        function getOwnMask() {
+
+            return mask;
+        }
+
+        function getMask() {
+
+            return getParent().getOwnMask();
+        }
+
         return {
 
             getX,
@@ -92,6 +105,8 @@ export const componentCreator = (()=>{
             setAlpha,
             getParent,
             getTotalAlpha,
+            getMask,
+            getOwnMask,
 
             id,
             type: 'container',
