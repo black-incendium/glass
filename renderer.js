@@ -111,17 +111,9 @@ export const renderer = (()=>{
 
             currentMatrix: matrixStack[matrixStack.length - 1],
 
-            translation: {
+            translation: component.getPosition(),
 
-                x: component.getX(),
-                y: component.getY(),
-            },
-
-            scaling: {
-
-                x: component.getScale().x,
-                y: component.getScale().y,
-            },
+            scaling: component.getScale(),
 
             rotation: {
 

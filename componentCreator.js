@@ -16,24 +16,22 @@ export const componentCreator = (()=>{
         let children = componentData?.children ?? [];
         let id = componentData.id;
 
-        function getX() {
+        function getPosition() {
 
-            return x;
+            return {x, y};
         }
 
-        function setX(value) {
+        function setPosition(positionObject) {
 
-            x = value;
-        }
+            if (positionObject.x !== undefined) {
 
-        function getY() {
+                x = positionObject.x
+            }
 
-            return y;
-        }
+            if (positionObject.y !== undefined) {
 
-        function setY(value) {
-
-            y = value;
+                y = positionObject.y
+            }
         }
 
         function getScale() {
@@ -41,10 +39,10 @@ export const componentCreator = (()=>{
             return {x: scaleX, y: scaleY};
         }
 
-        function setScaleXY(x, y) {
+        function setScale(scaleObject) {
 
-            scaleX = x;
-            scaleY = y;
+            scaleX = scaleObject.x;
+            scaleY = scaleObject.y;
         }
 
         function getRotation() {
@@ -98,12 +96,10 @@ export const componentCreator = (()=>{
 
         const returnObject = {
 
-            getX,
-            setX,
-            getY,
-            setY,
+            getPosition,
+            setPosition,
             getScale,
-            setScaleXY,
+            setScale,
             getRotation,
             setRotation,
             getAlpha,

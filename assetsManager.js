@@ -1,4 +1,4 @@
-import { assetsManagerEventIds } from "./eventIds/assetsManagerEventIds.js";
+import { assetsManagerEventsData } from "./eventsData/assetsManagerEventsData.js";
 import { eventsManager } from "./eventsManager.js";
 
 export const assetsManager = (()=>{
@@ -166,7 +166,7 @@ export const assetsManager = (()=>{
 
         if (fetchedSpritesheetJsonsNumber === totalSpritesheetJsonsToFetchNumber && loadedAssetsNumber === totalAssetsToLoadNumber) {
 
-            eventsManager.fireEvent({id: assetsManagerEventIds.allAssetsLoaded});
+            eventsManager.fireEvent(assetsManagerEventsData.allAssetsLoaded);
         }
     }
 

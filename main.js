@@ -5,7 +5,7 @@ import { renderer } from './renderer.js';
 import { resizeManager } from './resizeManager.js';
 import { glassConfig } from './glassConfig.js';
 import { eventsManager } from './eventsManager.js';
-import { assetsManagerEventIds } from './eventIds/assetsManagerEventIds.js';
+import { assetsManagerEventsData } from './eventsData/assetsManagerEventsData.js';
 
 /** description */
 
@@ -24,9 +24,10 @@ function initialize(data) {
     assetsManager.initialize({gl, assetsData: data.assetsData});
     renderer.initialize({gl});
 
-    eventsManager.addEventListener(assetsManagerEventIds.allAssetsLoaded, () => {
+    eventsManager.addEventListener(assetsManagerEventsData.allAssetsLoaded.id, () => {
 
         renderer.startRendering();
+
     }, {oneTimeEvent: true});
 
     if (config.exposeGlassAppInConsole) {
