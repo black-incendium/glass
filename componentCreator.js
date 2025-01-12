@@ -1,6 +1,6 @@
 export const componentCreator = (()=>{
 
-    function newContainer(componentData, parentArg) {
+    function newContainer(componentData) {
 
         let x = componentData?.x ?? 0;
         let y = componentData?.y ?? 0;
@@ -12,7 +12,7 @@ export const componentCreator = (()=>{
         let mask = componentData?.mask ?? {x:0,y:0,width:0,height:0}
         mask.maskOn = maskOn;
 
-        let parent = parentArg;
+        let parent = null;
         let children = componentData?.children ?? [];
         let id = componentData.id;
 
@@ -72,11 +72,18 @@ export const componentCreator = (()=>{
             return parent;
         }
 
-        function getTotalAlpha() {
+        function setParent(parentArg) {
 
+            parentArg.children.push(returnObject);
+            parent = parentArg
+        }
+
+        function getTotalAlpha() {
+            
             const parentTotalAlpha = getParent()?.getTotalAlpha?.() ?? 1;
 
             return getAlpha()*parentTotalAlpha;
+            
         }
 
         function getOwnMask() {
@@ -86,10 +93,10 @@ export const componentCreator = (()=>{
 
         function getMask() {
 
-            return getParent().getOwnMask();
+            return getParent()?.getOwnMask?.() ?? {x:0,y:0,width:0,height:0,maskOn:false};
         }
 
-        return {
+        const returnObject = {
 
             getX,
             setX,
@@ -102,6 +109,7 @@ export const componentCreator = (()=>{
             getAlpha,
             setAlpha,
             getParent,
+            setParent,
             getTotalAlpha,
             getMask,
             getOwnMask,
@@ -109,15 +117,17 @@ export const componentCreator = (()=>{
             id,
             type: 'container',
             children
-        }
+        };
+
+        return returnObject;
     }
 
-    function newSprite(componentData, parent) {
+    function newSprite(componentData) {
 
-        const baseObject = newContainer(componentData, parent);
+        const baseObject = newContainer(componentData);
 
         const assets = componentData?.assets ?? [];
-        const curretAssetIndex = componentData?.assetIndex ?? 0;
+        let curretAssetIndex = componentData?.assetIndex ?? 0;
 
         function getCurrentAssetName() {
 
@@ -129,15 +139,17 @@ export const componentCreator = (()=>{
             curretAssetIndex = value;
         }
 
-        return {
+        const returnObject = {
 
             ...baseObject,
 
             type: 'sprite',
 
             getCurrentAssetName,
-            setAssetIndex
+            setAssetIndex,
         }
+
+        return returnObject;
     }
 
     return {

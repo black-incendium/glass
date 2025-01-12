@@ -38,8 +38,6 @@ export const componentsManager = (()=>{
 
     function recursiveSetupComponent(componentData, parent) {
 
-        let object;
-
         componentData?.children?.forEach?.(child => {
 
             for (let key of Object.getOwnPropertyNames(componentData?.childrenCommonProperties ?? {})) {
@@ -47,19 +45,36 @@ export const componentsManager = (()=>{
             }
         });
 
-        if (componentData.type == 'sprite') object = componentCreator.newSprite(componentData, parent);
-        if (componentData.type == 'container' || componentData.type == undefined) object = componentCreator.newContainer(componentData, parent);
+        const object = createComponent(componentData);
 
-        Object.defineProperty(object, 'type', {
-
-            writable: false
-        });
+        if (parent != undefined) object.setParent(parent);
 
         object.children = object.children.map(child => recursiveSetupComponent(child, object));
-
-        components[object.id] = object;
         
         return object;
+    }
+
+    function createComponent(componentData) {
+
+        let component;
+
+        if (componentData.type == 'sprite') component = componentCreator.newSprite(componentData);
+        if (componentData.type == 'container' || componentData.type == undefined) component = componentCreator.newContainer(componentData);
+
+        Object.defineProperty(component, 'type', {
+            
+            writable: false
+        });
+        
+        if (components[component.id] !== undefined) {
+
+            console.warn(`component with id ${component.id} already exists!`);
+        }
+
+        if (component.id === "tile0x0") window.c = components;
+        components[component.id] = component;
+
+        return component
     }
 
     function getComponentsTreeRoot() {
@@ -72,10 +87,17 @@ export const componentsManager = (()=>{
         return components[id];
     }
 
+    function getComponents() {
+
+        return components;
+    }
+
     return {
 
         initialize,
         getComponentsTreeRoot,
-        getComponentById
+        getComponentById,
+        getComponents,
+        createComponent
     }
 })();

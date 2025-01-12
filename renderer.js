@@ -11,9 +11,11 @@ export const renderer = (()=>{
     let matrixLocation;
     let opacityLocation;
     let textureLocation;
+    let textureMatrixLocation;
     let root;
     let gameSize;
     let gameToClipSpaceScaleData;
+    let texcoordBuffer;
     let matrixStack = [];
 
     function initialize(data) {
@@ -30,6 +32,7 @@ export const renderer = (()=>{
         in vec2 a_texcoord;
 
         uniform mat3 u_matrix;
+        uniform mat3 u_textureMatrix;
 
         out vec2 v_texcoord;
 
@@ -39,7 +42,7 @@ export const renderer = (()=>{
 
             gl_Position = vec4(position.x, -position.y, 0.0, 1.0);
 
-            v_texcoord = a_texcoord;
+            v_texcoord = (u_textureMatrix * vec3(a_texcoord, 1.0)).xy;
         }
         `;
 
@@ -69,6 +72,7 @@ export const renderer = (()=>{
         matrixLocation = gl.getUniformLocation(program, "u_matrix");
         opacityLocation = gl.getUniformLocation(program, "u_opacity");
         textureLocation = gl.getUniformLocation(program, "u_texture");
+        textureMatrixLocation = gl.getUniformLocation(program, "u_textureMatrix");
 
         const vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
@@ -85,7 +89,7 @@ export const renderer = (()=>{
         gl.enableVertexAttribArray(positionAttributeLocation);
         gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
-        const texcoordBuffer = gl.createBuffer();
+        texcoordBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
         const texcoords = [
             0, 0,
@@ -160,7 +164,7 @@ export const renderer = (()=>{
                 // gl.depthMask(false);
                 gl.colorMask(false, false, false, false);
 
-                let textureInfo = assetsManager.getAssetDataByName('maskAsset');
+                const textureInfo = assetsManager.getAssetDataByName('maskAsset');
 
                 const textureUnit = 0;
                 gl.uniform1i(textureLocation, textureUnit);
@@ -188,7 +192,8 @@ export const renderer = (()=>{
             gl.stencilFunc(gl.EQUAL, 1, 0xff);
             gl.stencilMask(0x00);
 
-            let textureInfo = assetsManager.getAssetDataByName(component.getCurrentAssetName());
+            const textureInfo = assetsManager.getAssetDataByName(component.getCurrentAssetName());
+            const textureMatricesData = textureInfo.sourceTextureMatricesData
 
             const textureUnit = 0;
             gl.uniform1i(textureLocation, textureUnit);
@@ -204,6 +209,11 @@ export const renderer = (()=>{
                 m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
                 m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
             ]));
+
+            gl.uniformMatrix3fv(textureMatrixLocation, false, m3.multiplyTwoMatrices(
+                m3.getScalingMatrix(textureMatricesData.scale.x, textureMatricesData.scale.y),
+                m3.getTranslationMatrix(textureMatricesData.translation.x, textureMatricesData.translation.y)
+            ));
 
             const offset = 0;
             const count = 4;
