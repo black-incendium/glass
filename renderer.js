@@ -4,6 +4,7 @@ import { assetsManager } from "./assetsManager.js";
 import { gameState } from './gameState.js';
 import { componentsManager } from './componentsManager.js';
 import { resizeManager } from './resizeManager.js';
+import { progressorsManager } from './progressorsManager.js';
 
 export const renderer = (()=>{
 
@@ -17,6 +18,7 @@ export const renderer = (()=>{
     let gameToClipSpaceScaleData;
     let texcoordBuffer;
     let matrixStack = [];
+    let previousRenderTime;
 
     function initialize(data) {
 
@@ -241,12 +243,16 @@ export const renderer = (()=>{
             y: 2/gameSize.height
         };
 
+        progressorsManager.updateProgressors(time - previousRenderTime);
+
         root.children?.forEach(children => {
             
             recursiveDrawComponent(children);
         });
 
         requestAnimationFrame(render);
+
+        previousRenderTime = time;
     }
 
     function startRendering() {
@@ -254,6 +260,8 @@ export const renderer = (()=>{
         root = componentsManager.getComponentsTreeRoot();
 
         matrixStack[0] = m3.getIdentityMatrix();
+
+        previousRenderTime = 0;
         
         requestAnimationFrame(render);
     }
