@@ -5,6 +5,8 @@ import { gameState } from './gameState.js';
 import { componentsManager } from './componentsManager.js';
 import { resizeManager } from './resizeManager.js';
 import { progressorsManager } from './progressorsManager.js';
+import { eventsManager } from './eventsManager.js';
+import { rendererEventsData } from './eventsData/rendererEventsData.js';
 
 export const renderer = (()=>{
 
@@ -263,6 +265,8 @@ export const renderer = (()=>{
 
         previousRenderTime = 0;
         
+        eventsManager.fireEvent(rendererEventsData.renderingStarted);
+
         requestAnimationFrame(render);
     }
 

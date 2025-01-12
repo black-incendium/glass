@@ -10,7 +10,7 @@ export const eventsManager = (()=>{
 
                 eventListener.callback(event.callbackData, event);
 
-                if (eventListener.options.oneTimeEvent === true) {
+                if (eventListener.options.oneTime === true) {
 
                     removeEventListener(eventListener.id);
                 }

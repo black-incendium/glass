@@ -28,7 +28,7 @@ function initialize(data) {
 
         renderer.startRendering();
 
-    }, {oneTimeEvent: true});
+    }, {oneTime: true});
 
     if (config.exposeGlassAppInConsole) {
 
