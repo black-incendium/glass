@@ -1,12 +1,27 @@
+type eventType = {
+    eventName: string,
+    callbackData: Record<string, any>,
+}
+
+type eventListenerType = {
+
+    eventName: string,
+    id: Symbol,
+    options: {
+        oneTime?: boolean
+    },
+    callback: Function,
+}
+
 export const eventsManager = (()=>{
 
-    let eventListeners = [];
+    let eventListeners: eventListenerType[] = [];
 
-    function fireEvent(event) {
+    function fireEvent(event: eventType): void {
 
         [...eventListeners].forEach(eventListener => {
 
-            if (eventListener.eventId === event.id) {
+            if (eventListener.eventName === event.eventName) {
 
                 eventListener.callback(event.callbackData, event);
 
@@ -18,12 +33,12 @@ export const eventsManager = (()=>{
         });
     }
 
-    function addEventListener(eventId, callback, options = {}) {
+    function addEventListener(eventName: string, callback: Function, options?: { oneTime: boolean }) {
 
         const eventListener = {
-            eventId,
+            eventName,
             callback,
-            options,
+            options: options ?? {},
             id: Symbol()
         }
 
@@ -32,7 +47,7 @@ export const eventsManager = (()=>{
         return eventListener.id;
     }
 
-    function removeEventListener(eventListenerId) {
+    function removeEventListener(eventListenerId: Symbol) {
 
         eventListeners = eventListeners.filter(eventListener => eventListener.id !== eventListenerId);
     }
