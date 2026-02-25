@@ -1,9 +1,11 @@
+import { sizeType } from "../types/globalTypes.js";
+
 export const resizeManager = (()=>{
 
-    let canvas;
-    let gl;
+    let canvas: HTMLCanvasElement;
+    let gl: WebGL2RenderingContext;
 
-    function initialize(data) {
+    function initialize(data: {canvas:  HTMLCanvasElement, gl: WebGL2RenderingContext}): void {
 
         canvas = data.canvas;
         gl = data.gl;
@@ -12,7 +14,7 @@ export const resizeManager = (()=>{
         canvasResizeCallback();
     }
 
-    function canvasResizeCallback() {
+    function canvasResizeCallback(): void {
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -20,7 +22,7 @@ export const resizeManager = (()=>{
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     }
 
-    function getCanvasSize() {
+    function getCanvasSize(): sizeType {
 
         return {
             width: canvas.width,

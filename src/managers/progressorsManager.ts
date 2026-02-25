@@ -1,10 +1,35 @@
+// @ts-nocheck
+
+type newProgressorDataType = {
+
+    startValue: number,
+    targetValue: number,
+    duration: number,
+    startCallback: Function,
+    updateCallback: Function,
+    finishCallback: Function,
+}
+
+type progressorStateType = {
+
+    startValue: number,
+    targetValue: number,
+    duration: number,
+    startCallback: Function,
+    updateCallback: Function,
+    finishCallback: Function,
+    isRunning: boolean
+    timeElapsedSinceStart: number,
+    currentValue: number,
+}
+
 export const progressorsManager = (()=>{
 
     let progressors = {};
-    let runningProgressorIds = [];
-    let progressorStates = {};
+    let runningProgressorIds = [] as symbol[];
+    let progressorStates = {} as Record <symbol, progressorStateType>;
 
-    function getNewProgressor(progressorData) {
+    function getNewProgressor(progressorData: newProgressorDataType) {
 
         const id = Symbol();
 
@@ -23,10 +48,10 @@ export const progressorsManager = (()=>{
 
         function start() {
 
-            if (progressorStates[id].isRunning === true) return;
+            if (progressorStates[id]?.isRunning === true) return;
 
-            progressorStates[id].isRunning = true;
-            progressorStates[id].timeElapsedSinceStart = 0;
+            progressorStates[id]!.isRunning = true;
+            progressorStates[id]!.timeElapsedSinceStart = 0;
             runningProgressorIds.push(id);
 
             callStartCallback();
