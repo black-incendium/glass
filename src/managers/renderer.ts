@@ -1,6 +1,6 @@
 // @ts-nocheck //! js -> ts  not urgent
 
-import { rendererUtils } from './rendererUtils.js';
+import { rendererUtils } from '../utils/rendererUtils.js';
 import { m3 } from '../utils/m3.js';
 import { assetsManager } from "./assetsManager.js";
 import { gameState } from './gameState.js';
@@ -68,7 +68,7 @@ export const renderer = (()=>{
         }
         `;
 
-        const program = utils.createProgramFromShaders(gl, vertexShaderSource, fragmentShaderSource);
+        const program = rendererUtils.createProgramFromShaders(gl, vertexShaderSource, fragmentShaderSource);
 
         gl.useProgram(program);
 

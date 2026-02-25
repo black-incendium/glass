@@ -1,8 +1,8 @@
-import { containerApiType, containerInitDataType, containerStateType, containerType } from "../types/componentCreationTypes.js";
+import { componentInstanceType, containerApiType, containerInitDataType, containerStateType, containerType } from "../types/componentCreationTypes.js";
 
 export const containerApi = {
 
-    addChild: function(child: containerType): void {
+    addChild: function(child: componentInstanceType<"container">): void {
 
         if (child.parent !== null) {
 

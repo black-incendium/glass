@@ -19,13 +19,10 @@ export type componentsRegisteryKeyType = keyof componentsRegistryType;
 
 export type componentInitDataType<K extends componentsRegisteryKeyType> = componentsRegistryType[K]["init"];
 export type componentInstanceType<K extends componentsRegisteryKeyType> = componentsRegistryType[K]["instance"];
+export type componentStateType<K extends componentsRegisteryKeyType> = componentsRegistryType[K]["state"];
 
+export type baseInitDataType = {
 
-// -------------------------------------------CONTAINER-------------------------------------------------
-
-export type containerInitDataType = {
-
-    type?: 'container',
     id: string,
     x?: number,
     y?: number
@@ -43,16 +40,14 @@ export type containerInitDataType = {
         width?: number,
         height?: number,
         isOn?: boolean
-    }
-    children?: containerInitDataType[]
+    },
+    children?: anyComponentInitDataType[]
 }
 
-export type containerStateType = {
-
-    type: 'container',
+export type baseStateType =  {
     id: string,
-    children: containerType[],
-    parent:  containerType | null,
+    children: anyComponentType[],
+    parent:  anyComponentType | null,
     x: number,
     y: number
     scaleX: number
@@ -68,9 +63,21 @@ export type containerStateType = {
     }
 }
 
+// -------------------------------------------CONTAINER-------------------------------------------------
+
+export type containerInitDataType = baseInitDataType & {
+
+    type: 'container',
+}
+
+export type containerStateType = baseStateType & {
+
+    type: 'container',
+}
+
 export type containerApiType = {
 
-    addChild: (child: containerType) => void,
+    addChild: (child: anyComponentType) => void,
     getTotalAlpha: () => number
 }
 
@@ -78,14 +85,14 @@ export type containerType = containerApiType & containerStateType;
 
 // ----------------------------------------SPRITE----------------------------------------------------
 
-export type spriteInitDataType = Omit<containerInitDataType, "type"> & {
+export type spriteInitDataType = baseInitDataType & {
 
     type: 'sprite',
     assets?: string[],
     frameIndex?: number
 };
 
-export type spriteStateType = Omit<containerStateType, "type"> & {
+export type spriteStateType = baseStateType & {
 
     type: 'sprite',
     assets: string[],
@@ -99,7 +106,5 @@ export type spriteApiType = containerApiType & {
 
 export type spriteType = spriteApiType & spriteStateType;
 
-// ------------------------------------------ANY--------------------------------------------------
-
-export type anyComponentInitDataType = containerInitDataType | spriteInitDataType;
-export type anyComponentType = containerType | spriteType;
+export type anyComponentType =  containerType | spriteType
+export type anyComponentInitDataType =  containerInitDataType | spriteInitDataType

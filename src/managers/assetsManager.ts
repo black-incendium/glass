@@ -1,7 +1,7 @@
 // @ts-nocheck //! TODO rewrite to ts
 
-import { assetsManagerEventsData } from "./eventsData/assetsManagerEventsData.js";
-import { eventsManager } from "./managers/eventsManager.js";
+import { assetsManagerEventsData } from "../eventsData/assetsManagerEventsData.js";
+import { eventsManager } from "./eventsManager.js";
 
 export const assetsManager = (()=>{
 

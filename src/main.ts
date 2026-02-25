@@ -6,6 +6,7 @@ import { resizeManager } from './managers/resizeManager.js';
 import { glassConfig } from './configs/glassConfig.js';
 import { eventsManager } from './managers/eventsManager.js';
 import { assetsManagerEventsData } from './eventsData/assetsManagerEventsData.js';
+import { anyComponentInitDataType } from './types/componentCreationTypes.js';
 
 /** description */
 
@@ -23,7 +24,7 @@ type assetsConfigType = {
     }[]
 };
 
-type layoutConfigType = anyLayoutNodeType;
+type layoutConfigType = anyComponentInitDataType[];
 
 type glassInitDataType = {
     canvas: HTMLCanvasElement, 
@@ -35,29 +36,6 @@ type glassInitDataType = {
     layoutData: layoutConfigType,
     assetsData: assetsConfigType
 };
-
-type layoutContainerType = {
-
-    type?: 'container'
-    x?: number, y?: number,
-    rotation?: number,
-    scale?: number,
-    mask?: {
-        x?: number, y?: number,
-        width?: number, height?: 0,
-    },
-    scaleX?: number, scaleY?: number,
-    alpha?: number,
-    children?:  Record<string, anyLayoutNodeType>
-};
-
-type layoutSpriteType = layoutContainerType &  {
-
-    type: 'sprite',
-    assets?: string[],
-};
-
-type anyLayoutNodeType = layoutContainerType | layoutSpriteType;
 
 function initialize(initData:  glassInitDataType) {
 

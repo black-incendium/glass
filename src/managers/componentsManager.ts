@@ -1,91 +1,61 @@
-// @ts-nocheck //! TODO rewrite to ts
-
-import { createNewComponent } from "./componentCreation/componentCreation.js";
+import { containerApi, getContainerInitState } from "../componentCreation/containerCreation.js";
+import { getSpriteInitState, spriteApi } from "../componentCreation/spriteCreation.js";
+import { anyComponentInitDataType, anyComponentType, containerType } from "../types/componentCreationTypes.js";
 
 export const componentsManager = (()=>{
 
-    let gameContainer = {id:"gameContainer", type:'container'};
-    let components = {};
+    let mainGlassContainerInitData = {id:"mainGlassContainer", type:'container', children: []} as anyComponentInitDataType;
+    let mainGlassContainer: anyComponentType | null = null;
+    let components: Record<string, anyComponentType> = {};
 
-    function initialize(layoutData) {
+    const createNewComponent = (() => {
 
-        gameContainer.children = [];
+        function createFunction(initData: anyComponentInitDataType): anyComponentType | null {
 
-        gameContainer.children = layoutData;
+            const children = initData.children?.map(childInitData => {
 
-        recursiveParseComponentsTreeNode(gameContainer);
-        gameContainer = recursiveSetupComponent(gameContainer);
-    }
+                return createNewComponent(childInitData);
+                //? todo: wrong data + common
+            })?.filter(el => el !== null) ?? [];
 
-    function recursiveParseComponentsTreeNode(parentNode) {
+            let resultObject = null;
 
-        if (parentNode.children == undefined) parentNode.children = {};
+            switch (initData.type)  {
 
-        const children = [];
+                case "container":
+                    resultObject = Object.assign(Object.create(containerApi), getContainerInitState(initData), {children: children, parent: null});
+                break;
 
-        for (let elementName of Object.getOwnPropertyNames(parentNode.children)) {
-
-            if (components[elementName] != undefined) return; //! warn
-
-            children.push(parentNode.children[elementName]);
-            parentNode.children[elementName].parent = parentNode;
-            parentNode.children[elementName].id = elementName;
-
-            recursiveParseComponentsTreeNode(parentNode.children[elementName]);
-        }
-
-        parentNode.children = children;
-    }
-
-    function recursiveSetupComponent(componentData, parent) {
-
-        componentData?.children?.forEach?.(child => {
-
-            for (let key of Object.getOwnPropertyNames(componentData?.childrenCommonProperties ?? {})) {
-                child[key] = child[key] ?? componentData?.childrenCommonProperties[key];
+                case "sprite":
+                    resultObject = Object.assign(Object.create(spriteApi), getSpriteInitState(initData), {children: children, parent: null});
+                break;
             }
-        });
 
-        const object = createComponent(componentData);
+            children.forEach(child => {
+                child.parent = resultObject
+            });
 
-        if (parent != undefined) object.setParent(parent);
-
-        object.children = object.children.map(child => recursiveSetupComponent(child, object));
-        
-        return object;
-    }
-
-    function createComponent(componentData) {
-
-        let component;
-
-        if (componentData.type == 'sprite') component = componentCreator.newSprite(componentData);
-        if (componentData.type == 'container' || componentData.type == undefined) component = componentCreator.newContainer(componentData);
-
-        Object.defineProperty(component, 'type', {
-            
-            writable: false
-        });
-        
-        if (components[component.id] !== undefined) {
-
-            console.warn(`component with id ${component.id} already exists!`);
+            return resultObject
         }
 
-        if (component.id === "tile0x0") window.c = components;
-        components[component.id] = component;
+        return createFunction
+    })();
 
-        return component
+    function initialize(layoutData: anyComponentInitDataType[]) {
+
+        mainGlassContainerInitData.children = layoutData;
+
+        mainGlassContainer = createNewComponent(mainGlassContainerInitData);
     }
 
     function getComponentsTreeRoot() {
 
-        return gameContainer;
+        return mainGlassContainer;
     }
 
-    function getComponentById(id) {
+    function getComponentById(id: string): anyComponentType | null {
 
-        return components[id];
+        return components?.[id] ?? null;
     }
 
     function getComponents() {
@@ -99,6 +69,6 @@ export const componentsManager = (()=>{
         getComponentsTreeRoot,
         getComponentById,
         getComponents,
-        createComponent
+        createNewComponent
     }
 })();
