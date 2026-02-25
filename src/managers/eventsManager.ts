@@ -1,5 +1,5 @@
 type eventType = {
-    eventName: string,
+    name: string,
     callbackData: Record<string, any>,
 }
 
@@ -21,7 +21,7 @@ export const eventsManager = (()=>{
 
         [...eventListeners].forEach(eventListener => {
 
-            if (eventListener.eventName === event.eventName) {
+            if (eventListener.eventName === event.name) {
 
                 eventListener.callback(event.callbackData, event);
 

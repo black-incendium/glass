@@ -230,9 +230,9 @@ export const renderer = (()=>{
 
         matrixStack.push(componentTransformationsMatrix);
 
-        component?.children?.forEach(children => {
+        component?.children?.forEach(child => {
 
-            recursiveDrawComponent(children);
+            recursiveDrawComponent(child);
         });
 
         matrixStack.pop();
