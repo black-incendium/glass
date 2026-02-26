@@ -34,7 +34,7 @@ export type progressorApiType = {
 
 export type progressorType = progressorStateType & progressorApiType;
 
-export const progressorsManager = (()=>{
+export const progressorsManager = (() => {
 
     let progressors = {} as Record <symbol, progressorType>;
     let runningProgressors = [] as progressorType[];
@@ -121,7 +121,7 @@ export const progressorsManager = (()=>{
         return result
     }
 
-    function updateProgressors(deltaTime: number) {
+    function updateProgressors(deltaTime: number): void {
 
         runningProgressors.forEach(progressor => {
 
