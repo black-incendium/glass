@@ -16,7 +16,7 @@ type rendererMatrix = [
    number, number, number 
 ];
 
-export const renderer = (()=>{
+export const renderer = (() => {
 
     let gl: WebGL2RenderingContext;
     let matrixLocation: WebGLUniformLocation;
@@ -30,7 +30,7 @@ export const renderer = (()=>{
     let matrixStack: rendererMatrix[] = [];
     let previousRenderTime: number;
 
-    function initialize(initData: {gl: WebGL2RenderingContext}) {
+    function initialize(initData: {gl: WebGL2RenderingContext}): void {
 
         gl = initData.gl;
         setupProgram();
@@ -128,7 +128,7 @@ export const renderer = (()=>{
         gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
     }
 
-    function recursiveDrawComponent(component: anyComponentType) {
+    function recursiveDrawComponent(component: anyComponentType): void {
 
         const componentParentMask = component.parent?.mask ?? {x: 0, y: 0, isOn: false, width: 0, height: 0};
 
@@ -301,7 +301,7 @@ export const renderer = (()=>{
         previousRenderTime = time;
     }
 
-    function startRendering() {
+    function startRendering(): void {
 
         root = componentsManager.getComponentsTreeRoot();
 
