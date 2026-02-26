@@ -13,22 +13,4 @@ renderer.ts  (not urgent)
 
 -------------------
 
-Migrate to ts and introduce changes to game layout tree creation in:
-
-componentCreator.ts
-componentsManager.ts
-
--------------------
-
 write documentation
-
-export const componentsManagerState = {};
-export const componentsManagerFunctions = (componentsManagerState) => {
-
-    return {
-
-
-    }
-};
-
-export const componentsManager = 
