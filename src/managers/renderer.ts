@@ -1,5 +1,3 @@
-// @ts-nocheck //! js -> ts  not urgent
-
 import { rendererUtils } from '../utils/rendererUtils.js';
 import { m3 } from '../utils/m3.js';
 import { assetsManager } from "./assetsManager.js";
@@ -9,28 +7,36 @@ import { resizeManager } from './resizeManager.js';
 import { progressorsManager } from './progressorsManager.js';
 import { eventsManager } from './eventsManager.js';
 import { rendererEventsData } from '../eventsData/rendererEventsData.js';
+import { CoordinatesType, sizeType } from '../types/globalTypes.js';
+import { anyComponentType, containerType } from '../types/componentCreationTypes.js';
+
+type rendererMatrix = [
+   number, number, number, 
+   number, number, number, 
+   number, number, number 
+];
 
 export const renderer = (()=>{
 
-    let gl;
-    let matrixLocation;
-    let opacityLocation;
-    let textureLocation;
-    let textureMatrixLocation;
-    let root;
-    let gameSize;
-    let gameToClipSpaceScaleData;
-    let texcoordBuffer;
-    let matrixStack = [];
-    let previousRenderTime;
+    let gl: WebGL2RenderingContext;
+    let matrixLocation: WebGLUniformLocation;
+    let opacityLocation: WebGLUniformLocation;
+    let textureLocation: WebGLUniformLocation;
+    let textureMatrixLocation: WebGLUniformLocation;
+    let root: containerType;
+    let gameSize: sizeType;
+    let gameToClipSpaceScaleData: CoordinatesType;
+    let texcoordBuffer: WebGLBuffer;
+    let matrixStack: rendererMatrix[] = [];
+    let previousRenderTime: number;
 
-    function initialize(data) {
+    function initialize(initData: {gl: WebGL2RenderingContext}) {
 
-        gl = data.gl;
+        gl = initData.gl;
         setupProgram();
     }
 
-    function setupProgram() {
+    function setupProgram(): void {
 
         const vertexShaderSource = `#version 300 es
 
@@ -72,13 +78,24 @@ export const renderer = (()=>{
 
         gl.useProgram(program);
 
+        if (program === null) {
+
+            console.log(`renderer: created program  is null!`);
+            return
+        }
+
         const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
         const texcoordAttributeLocation = gl.getAttribLocation(program, "a_texcoord");
 
-        matrixLocation = gl.getUniformLocation(program, "u_matrix");
-        opacityLocation = gl.getUniformLocation(program, "u_opacity");
-        textureLocation = gl.getUniformLocation(program, "u_texture");
-        textureMatrixLocation = gl.getUniformLocation(program, "u_textureMatrix");
+        const matrixLocationRaw = gl.getUniformLocation(program, "u_matrix");
+        const opacityLocationRaw = gl.getUniformLocation(program, "u_opacity");
+        const textureLocationRaw = gl.getUniformLocation(program, "u_texture");
+        const textureMatrixLocationRaw = gl.getUniformLocation(program, "u_textureMatrix");
+
+        if (matrixLocationRaw !== null) matrixLocation = matrixLocationRaw;
+        if (opacityLocationRaw !== null) opacityLocation = opacityLocationRaw;
+        if (textureLocationRaw !== null) textureLocation = textureLocationRaw;
+        if (textureMatrixLocationRaw !== null) textureMatrixLocation = textureMatrixLocationRaw;
 
         const vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
@@ -111,17 +128,22 @@ export const renderer = (()=>{
         gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
     }
 
-    function recursiveDrawComponent(component) {
+    function recursiveDrawComponent(component: anyComponentType) {
 
-        const componentParentMask = component.parent?.mask ?? {x: 0, y: 0, maskOn: false, width: 0, height: 0};
+        const componentParentMask = component.parent?.mask ?? {x: 0, y: 0, isOn: false, width: 0, height: 0};
 
         const componentTransformationsMatrix = m3.getComponentTransformationsMatrix({
 
-            currentMatrix: matrixStack[matrixStack.length - 1],
+            currentMatrix: matrixStack[matrixStack.length - 1]!,
 
             translation: {
                 x: component.x,
                 y: component.y
+            },
+
+            pivotPoint:{
+                x: component.pivotPointX,
+                y: component.pivotPointY
             },
 
             scaling: {
@@ -137,12 +159,17 @@ export const renderer = (()=>{
 
         const componentMaskTransformationsMatrix = m3.getComponentTransformationsMatrix({
 
-            currentMatrix: matrixStack[matrixStack.length - 1],
+            currentMatrix: matrixStack[matrixStack.length - 1]!,
 
             translation: {
 
                 x: componentParentMask.x,
                 y: componentParentMask.y,
+            },
+
+            pivotPoint:{
+                x: 0,
+                y: 0
             },
 
             scaling: {
@@ -159,7 +186,7 @@ export const renderer = (()=>{
 
         if (component.type == 'sprite') {
 
-            if (componentParentMask.maskOn === true) {
+            if (componentParentMask.isOn === true) {
 
                 gl.enable(gl.STENCIL_TEST);
 
@@ -176,7 +203,7 @@ export const renderer = (()=>{
                 gl.uniform1i(textureLocation, textureUnit);
 
                 gl.activeTexture(gl.TEXTURE0 + textureUnit);
-                gl.bindTexture(gl.TEXTURE_2D, textureInfo.texture);
+                gl.bindTexture(gl.TEXTURE_2D, textureInfo!.texture);
 
                 gl.uniform1f(opacityLocation, 1.0);
 
@@ -245,7 +272,7 @@ export const renderer = (()=>{
         matrixStack.pop();
     }
 
-    function render(time) {
+    function render(time: number): void {
 
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);

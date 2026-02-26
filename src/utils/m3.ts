@@ -17,6 +17,10 @@ type transformationObjectType = {
         x: number,
         y: number
     },
+    pivotPoint: {
+        x: number,
+        y: number
+    }
     currentMatrix: matrixType
 };
 
@@ -98,12 +102,13 @@ export const m3 = (()=>{
 
         return multiplyMatrices([
 
+            getTranslationMatrix(-transformationObject.pivotPoint.x, -transformationObject.pivotPoint.y),
             getScalingMatrix(transformationObject.scaling.x, transformationObject.scaling.y),
             getOriginRotationMatrix(transformationObject.rotation.angle/360*2*Math.PI),
+            getTranslationMatrix(transformationObject.pivotPoint.x, transformationObject.pivotPoint.y),
             getTranslationMatrix(transformationObject.translation.x, transformationObject.translation.y),
             transformationObject.currentMatrix,
         ]);
-        
     }
 
     return {

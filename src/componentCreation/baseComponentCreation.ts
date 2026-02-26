@@ -1,4 +1,4 @@
-import { anyComponentType, baseApiType, baseComponentType, baseInitDataType, componentInstanceType, containerApiType, containerInitDataType, containerStateType, containerType } from "../types/componentCreationTypes.js";
+import { anyComponentType, baseApiType, baseComponentType, baseInitDataType, baseStateType, componentInstanceType, containerApiType, containerInitDataType, containerStateType, containerType } from "../types/componentCreationTypes.js";
 
 export const baseComponentApi = {
 
@@ -26,9 +26,9 @@ export const baseComponentApi = {
         return this.alpha * parentTotalAlpha;
     },
 
-} as baseComponentType as baseApiType;
+} as anyComponentType as baseApiType;
 
-export function getBaseComponentInitState(initData: baseInitDataType): containerStateType {
+export function getBaseComponentInitState(initData: baseInitDataType): baseStateType {
 
     //? todo: mask should have isOn: true when any properties of the mask are added
 
@@ -51,6 +51,8 @@ export function getBaseComponentInitState(initData: baseInitDataType): container
 
     return {
         type: "container",
+        pivotPointX: initData.pivotPointX ?? initData.pivotPoint?.x ?? 0,
+        pivotPointY: initData.pivotPointY ?? initData.pivotPoint?.y ?? 0,
         id: initData.id,
         children: [],
         mask: {

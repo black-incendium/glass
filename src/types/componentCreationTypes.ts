@@ -43,11 +43,17 @@ export type baseInitDataType = {
         height?: number,
         isOn?: boolean
     },
+    pivotPointX?: number,
+    pivotPointY?: number,
+    pivotPoint?: {
+        x?: number,
+        y?: number
+    }
     children?: anyComponentInitDataType[]
 }
 
 export type baseStateType =  {
-    
+
     type: componentsRegisteryKeyType,
     id: string,
     children: anyComponentType[],
@@ -64,7 +70,9 @@ export type baseStateType =  {
         y: number,
         width: number,
         height: number,
-    }
+    },
+    pivotPointX: number,
+    pivotPointY: number,
 }
 
 export type baseApiType = {
@@ -116,5 +124,5 @@ export type spriteApiType = baseApiType & {
 
 export type spriteType = spriteApiType & spriteStateType;
 
-export type anyComponentType =  baseComponentType | containerType | spriteType
+export type anyComponentType = containerType | spriteType
 export type anyComponentInitDataType =  containerInitDataType | spriteInitDataType
