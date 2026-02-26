@@ -1,6 +1,6 @@
 type eventType = {
     name: string,
-    callbackData: Record<string, any>,
+    callbackData?: Record<string, any>,
 }
 
 type eventListenerType = {
@@ -23,7 +23,7 @@ export const eventsManager = (()=>{
 
             if (eventListener.eventName === event.name) {
 
-                eventListener.callback(event.callbackData, event);
+                eventListener.callback(event);
 
                 if (eventListener.options.oneTime === true) {
 

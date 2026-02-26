@@ -1,43 +1,88 @@
-// @ts-nocheck //! TODO rewrite to ts
-
 import { assetsManagerEventsData } from "../eventsData/assetsManagerEventsData.js";
 import { eventsManager } from "./eventsManager.js";
 
-export const assetsManager = (()=>{
+export type assetType = {
+    texture:WebGLTexture,
+    width: number,
+    height: number,
+    sourceTextureMatricesData: {
+        translation: {
+            x: number,
+            y: number
+        },
+        scale: {
+            x: number,
+            y: number
+        },
+    }
+};
 
-    let gl;
-    let loadedAssetsNumber;
-    let totalAssetsToLoadNumber;
-    let fetchedSpritesheetJsonsNumber;
-    let totalSpritesheetJsonsToFetchNumber;
-    let assets = {};
+export type assetsManagerInitDataType = {
+
+    gl: WebGL2RenderingContext,
+    assetsData: {
+        commonPath: string,
+        spritesheetsList: {
+            spritesheetPath: string,
+            spritesheetJsonPath: string,
+        }[],
+        assetsList: {
+            name: string,
+            path: string,
+        }[]
+    }
+};
+
+export type spritesheetDataType = {
+
+    sprites: {
+
+        name:string,
+        width:number,
+        height:number,
+        x:number,
+        y:number
+    }[]
+};
+
+export const assetsManager = (() => {
+
+    let gl: WebGL2RenderingContext;
+    let loadedAssetsNumber: number;
+    let totalAssetsToLoadNumber: number;
+    let fetchedSpritesheetJsonsNumber: number;
+    let totalSpritesheetJsonsToFetchNumber: number;
+    let assets = {} as Record<string, assetType>;
     let managerInitialized = false;
 
-    function initialize(data) {
+    function initialize(initData: assetsManagerInitDataType): void {
 
-        gl = data.gl;
+        gl = initData.gl;
         loadedAssetsNumber = 0;
         fetchedSpritesheetJsonsNumber = 0;
-        totalSpritesheetJsonsToFetchNumber = data.assetsData.spritesheetsList.length;
-        totalAssetsToLoadNumber = data.assetsData.assetsList.length; // doesn't include all assets as long as all spritesheets are not fetched
+        totalSpritesheetJsonsToFetchNumber = initData.assetsData.spritesheetsList.length;
+        totalAssetsToLoadNumber = initData.assetsData.assetsList.length; // doesn't include all assets as long as all spritesheets are not fetched
         
-        data.assetsData.assetsList.forEach(el => {
+        initData.assetsData.assetsList.forEach(el => {
 
-            loadSingularAsset(el.name, data.assetsData.commonPath + el.path);
+            loadSingularAsset(el.name, initData.assetsData.commonPath + el.path);
         });
 
-        data.assetsData.spritesheetsList.forEach(el => {
+        initData.assetsData.spritesheetsList.forEach(el => {
 
-
-            loadSpritesheetAsset(data.assetsData.commonPath + el.spritesheetPath, data.assetsData.commonPath + el.spritesheetJsonPath);
+            loadSpritesheetAsset(initData.assetsData.commonPath + el.spritesheetPath, initData.assetsData.commonPath + el.spritesheetJsonPath);
         });
 
         managerInitialized = true;
     }
 
-    function loadSingularAsset(assetName, url) {
+    function loadSingularAsset(assetName: string, url: string): void {
 
-        if (assets[assetName] !== undefined) return //? --- warn
+        if (assets[assetName] !== undefined) {
+        
+            console.log(`assetsManager: asset with the name: ${assetName} already exists!`);
+            return;
+        }
 
         const texture = gl.createTexture();
 
@@ -80,7 +125,7 @@ export const assetsManager = (()=>{
         img.src = url;
     }
 
-    function loadSpritesheetAsset(spritesheetUrl, spritesheetJsonUrl) {
+    function loadSpritesheetAsset(spritesheetUrl: string, spritesheetJsonUrl: string): void {
 
         const texture = gl.createTexture();
 
@@ -103,12 +148,12 @@ export const assetsManager = (()=>{
 
             fetch(spritesheetJsonUrl)
                 .then(response => response.json())
-                .then(data => {
+                .then((spritesheetData: spritesheetDataType) => {
 
-                    totalAssetsToLoadNumber += data.sprites.length;
+                    totalAssetsToLoadNumber += spritesheetData.sprites.length;
                     incrementNumberOfFetchedSpritesheetJsons();
 
-                    data.sprites.forEach(spriteData => {
+                    spritesheetData.sprites.forEach(spriteData => {
                         
                         if (assets[spriteData.name] !== undefined) return //? --- warn
 
@@ -140,27 +185,27 @@ export const assetsManager = (()=>{
         img.src = spritesheetUrl;
     }
 
-    function getAssetDataByName(assetName) {
+    function getAssetDataByName(assetName: string): assetType | null {
 
-        return assets[assetName];
+        return assets[assetName] ?? null;
     }
 
-    function incrementNumberOfFetchedSpritesheetJsons() {
+    function incrementNumberOfFetchedSpritesheetJsons(): void {
 
         if (managerInitialized === false) {
 
-            console.error(`incrementNumberOfFetchedSpritesheetJsons called before manager initialization`);
+            console.error(`assetsManager: incrementNumberOfFetchedSpritesheetJsons called before manager initialization!`);
             return
         }
 
         fetchedSpritesheetJsonsNumber++;
     }
 
-    function incrementNumberOfLoadedAssets() {
+    function incrementNumberOfLoadedAssets(): void {
 
         if (managerInitialized === false) {
 
-            console.error(`incrementNumberOfLoadedAssets called before manager initialization`);
+            console.error(`assetsManager: incrementNumberOfLoadedAssets called before manager initialization!`);
             return
         }
 

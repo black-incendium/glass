@@ -199,6 +199,13 @@ export const renderer = (()=>{
             gl.stencilMask(0x00);
 
             const textureInfo = assetsManager.getAssetDataByName(component.getCurrentAssetName());
+
+            if (textureInfo === null) {
+
+                console.log(`renderer: texture info of the asset named: ${component.getCurrentAssetName()} is null!`);
+                return;
+            }
+
             const textureMatricesData = textureInfo.sourceTextureMatricesData
 
             const textureUnit = 0;

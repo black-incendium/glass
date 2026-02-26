@@ -24,7 +24,7 @@ export const componentsManager = (()=>{
                 //? todo: wrong data + common
             })?.filter(el => el !== null) ?? [];
 
-            let resultObject: anyComponentType;
+            let resultObject = null;
 
             switch (initData.type)  {
 
@@ -38,7 +38,7 @@ export const componentsManager = (()=>{
             }
 
             children.forEach(child => {
-                child!.parent = resultObject
+                child.parent = resultObject
             });
 
             components[initData.id] = resultObject;
