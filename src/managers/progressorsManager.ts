@@ -1,40 +1,108 @@
-// @ts-nocheck
-
-type newProgressorDataType = {
+export type newProgressorDataType = {
 
     startValue: number,
     targetValue: number,
     duration: number,
-    startCallback: Function,
-    updateCallback: Function,
-    finishCallback: Function,
+    startCallback: Function | null,
+    updateCallback: Function | null,
+    finishCallback: Function | null,
 }
 
-type progressorStateType = {
+export type progressorStateType = {
 
+    id: symbol,
     startValue: number,
     targetValue: number,
     duration: number,
-    startCallback: Function,
-    updateCallback: Function,
-    finishCallback: Function,
+    startCallback: Function | null,
+    updateCallback: Function | null,
+    finishCallback: Function | null,
     isRunning: boolean
     timeElapsedSinceStart: number,
     currentValue: number,
 }
 
+export type progressorApiType = {
+
+    start: () => void,
+    stop: (shouldCallFinishCallback: boolean) => void,
+    updateData: (progressorData: newProgressorDataType) => void,
+    callStartCallback: () => void,
+    callFinishCallback: () => void,
+    callUpdateCallback: <Data>(callbackData: Data) => void,
+}
+
+export type progressorType = progressorStateType & progressorApiType;
+
 export const progressorsManager = (()=>{
 
-    let progressors = {};
-    let runningProgressorIds = [] as symbol[];
-    let progressorStates = {} as Record <symbol, progressorStateType>;
+    let progressors = {} as Record <symbol, progressorType>;
+    let runningProgressors = [] as progressorType[];
 
-    function getNewProgressor(progressorData: newProgressorDataType) {
+    const progressorApi = {
 
-        const id = Symbol();
+        start: function(): void {
 
-        progressorStates[id] = {
+            if (this.isRunning === true) return;
 
+            this.isRunning = true;
+            this.timeElapsedSinceStart = 0;
+            runningProgressors.push(this);
+
+            this.callStartCallback();
+        },
+
+        stop: function(shouldCallFinishCallback = false): void {
+
+            if (this.isRunning === false) return;
+
+            this.isRunning = false;
+            runningProgressors = runningProgressors.filter(progressor => progressor !== this);
+
+            if (shouldCallFinishCallback === true) {
+
+                this.callFinishCallback();
+            }
+        },
+
+        callStartCallback: function(): void {
+
+            if (this.startCallback === null) return;
+
+            this.startCallback();
+        },
+
+        callUpdateCallback: function<Data>(callbackData?: Data): void {
+
+            if (this.updateCallback === null) return;
+
+            this.updateCallback();
+        },
+
+        callFinishCallback: function(): void {
+
+            if (this.finishCallback === null) return;
+
+            this.finishCallback();
+        },
+
+        updateData: function(progressorData: newProgressorDataType): void {
+
+            this.startValue = progressorData.startValue ?? this.startValue;
+            this.targetValue = progressorData.targetValue ?? this.targetValue;
+            this.duration = progressorData.duration ?? this.duration;
+            this.startCallback = progressorData.startCallback ?? this.startCallback;
+            this.updateCallback = progressorData.updateCallback ?? this.updateCallback;
+            this.finishCallback = progressorData.finishCallback ?? this.finishCallback;
+        }
+
+    } as progressorType as progressorApiType;
+
+    function getNewProgressor(progressorData: newProgressorDataType): progressorType {
+
+        const progressorState: progressorStateType = {
+
+            id: Symbol(),
             startValue: progressorData.startValue ?? 0,
             targetValue: progressorData.targetValue ?? 0,
             duration: progressorData.duration ?? 1000,
@@ -46,96 +114,29 @@ export const progressorsManager = (()=>{
             currentValue: 0
         }
 
-        function start() {
+        const result = Object.assign(Object.create(progressorApi), progressorState);
 
-            if (progressorStates[id]?.isRunning === true) return;
+        progressors[result.id] = result;
 
-            progressorStates[id]!.isRunning = true;
-            progressorStates[id]!.timeElapsedSinceStart = 0;
-            runningProgressorIds.push(id);
-
-            callStartCallback();
-        }
-
-        function stop(shouldCallFinishCallback = false) {
-
-            if (progressorStates[id].isRunning === false) return;
-
-            progressorStates[id].isRunning = false;
-            runningProgressorIds = runningProgressorIds.filter(progressorId => progressorId !== id);
-
-            if (shouldCallFinishCallback === true) {
-
-                callFinishCallback()
-            }
-        }
-
-        function updateData(progressorData) {
-
-            const startCallback = progressorData.startCallback === null ? null : (progressorData.startCallback ?? progressorStates[id].startCallback);
-            const updateCallback = progressorData.updateCallback === null ? null : (progressorData.updateCallback ?? progressorStates[id].updateCallback);
-            const finishCallback = progressorData.finishCallback === null ? null : (progressorData.finishCallback ?? progressorStates[id].finishCallback);
-
-            progressorStates[id] = {
-
-                startValue: progressorData.startValue ?? progressorStates[id].startValue,
-                targetValue: progressorData.targetValue ?? progressorStates[id].targetValue,
-                duration: progressorData.duration ?? progressorStates[id].duration,
-                startCallback: startCallback,
-                updateCallback: updateCallback,
-                finishCallback: finishCallback,
-                isRunning: progressorStates[id].isRunning,
-                timeElapsedSinceStart: progressorStates[id].timeElapsedSinceStart
-            };
-        }
-
-        function callStartCallback() {
-
-            if (progressorStates[id].startCallback === null) return;
-
-            progressorStates[id].startCallback();
-        }
-
-        function callFinishCallback() {
-
-            if (progressorStates[id].finishCallback === null) return;
-
-            progressorStates[id].finishCallback();
-        }
-
-        const progressor = {
-
-            start,
-            stop,
-            updateData,
-            id
-        };
-
-        progressors[id] = progressor;
-
-        return progressor;
+        return result
     }
 
-    function updateProgressors(deltaTime) {
+    function updateProgressors(deltaTime: number) {
 
-        runningProgressorIds.forEach(progressorId => {
+        runningProgressors.forEach(progressor => {
 
-            const progressorState = progressorStates[progressorId];
+            progressor.timeElapsedSinceStart = Math.min(progressor.duration, progressor.timeElapsedSinceStart + deltaTime);
 
-            progressorState.timeElapsedSinceStart = Math.min(progressorState.duration, progressorState.timeElapsedSinceStart + deltaTime);
+            const progress = progressor.timeElapsedSinceStart / progressor.duration;
 
-            const progress = progressorState.timeElapsedSinceStart / progressorState.duration;
+            progressor.currentValue = progressor.startValue * (1 - progress) + progressor.targetValue * progress;
 
-            progressorState.currentValue = progressorState.startValue * (1 - progress) + progressorState.targetValue * progress;
+            if (progressor.timeElapsedSinceStart === progressor.duration) {
 
-            if (progressorState.timeElapsedSinceStart === progressorState.duration) {
-
-                progressors[progressorId].stop(true);
+                progressor.stop(true);
             }
 
-            if (progressorState.updateCallback === null) return;
-
-            progressorState.updateCallback(progressorState.currentValue);
+            progressor.callUpdateCallback<number>(progressor.currentValue);
         });
     }
 
