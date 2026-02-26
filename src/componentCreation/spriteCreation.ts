@@ -1,7 +1,7 @@
 import { spriteApiType, spriteInitDataType, spriteStateType, spriteType } from "../types/componentCreationTypes.js";
-import { containerApi, getContainerInitState } from "./containerCreation.js";
+import { baseComponentApi, getBaseComponentInitState } from "./baseComponentCreation.js";
 
-export const spriteApi = Object.assign(Object.create(containerApi), {
+export const spriteApi = Object.assign(Object.create(baseComponentApi), {
 
     getCurrentAssetName: function(): string {
 
@@ -12,10 +12,10 @@ export const spriteApi = Object.assign(Object.create(containerApi), {
 
 export function getSpriteInitState(initData: spriteInitDataType): spriteStateType {
 
-    const containerInitState = getContainerInitState({...initData,  type: "container"});
+    const baseInitState = getBaseComponentInitState(initData);
 
     return {
-        ...containerInitState,
+        ...baseInitState,
         type: "sprite",
         frameIndex: initData.frameIndex ?? 0,
         assets: initData.assets ?? [],

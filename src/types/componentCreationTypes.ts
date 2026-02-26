@@ -21,9 +21,11 @@ export type componentInitDataType<K extends componentsRegisteryKeyType> = compon
 export type componentInstanceType<K extends componentsRegisteryKeyType> = componentsRegistryType[K]["instance"];
 export type componentStateType<K extends componentsRegisteryKeyType> = componentsRegistryType[K]["state"];
 
+// -------------------BASE---------------------------
 export type baseInitDataType = {
 
     id: string,
+    type: componentsRegisteryKeyType,
     x?: number,
     y?: number,
     scaleX?: number,
@@ -45,6 +47,8 @@ export type baseInitDataType = {
 }
 
 export type baseStateType =  {
+    
+    type: componentsRegisteryKeyType,
     id: string,
     children: anyComponentType[],
     parent:  anyComponentType | null,
@@ -63,6 +67,14 @@ export type baseStateType =  {
     }
 }
 
+export type baseApiType = {
+
+    addChild: (child: anyComponentType) => void,
+    getTotalAlpha: () => number
+}
+
+export type baseComponentType = baseStateType & baseApiType;
+
 // -------------------------------------------CONTAINER-------------------------------------------------
 
 export type containerInitDataType = baseInitDataType & {
@@ -75,10 +87,8 @@ export type containerStateType = baseStateType & {
     type: 'container',
 }
 
-export type containerApiType = {
+export type containerApiType = baseApiType & {
 
-    addChild: (child: anyComponentType) => void,
-    getTotalAlpha: () => number
 }
 
 export type containerType = containerApiType & containerStateType;
@@ -99,12 +109,12 @@ export type spriteStateType = baseStateType & {
     frameIndex: number
 }
 
-export type spriteApiType = containerApiType & {
+export type spriteApiType = baseApiType & {
 
     getCurrentAssetName: () => string
 }
 
 export type spriteType = spriteApiType & spriteStateType;
 
-export type anyComponentType =  containerType | spriteType
+export type anyComponentType =  baseComponentType | containerType | spriteType
 export type anyComponentInitDataType =  containerInitDataType | spriteInitDataType
