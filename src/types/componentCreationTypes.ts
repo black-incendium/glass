@@ -25,14 +25,14 @@ export type baseInitDataType = {
 
     id: string,
     x?: number,
-    y?: number
-    scaleX?: number
-    scaleY?: number
+    y?: number,
+    scaleX?: number,
+    scaleY?: number,
     scale?: {
         x?: number,
         y?: number
-    }
-    alpha?: number
+    } | number,
+    alpha?: number,
     rotation?: number,
     mask?: {
         x?: number,
@@ -49,10 +49,10 @@ export type baseStateType =  {
     children: anyComponentType[],
     parent:  anyComponentType | null,
     x: number,
-    y: number
-    scaleX: number
-    scaleY: number
-    alpha: number
+    y: number,
+    scaleX: number,
+    scaleY: number,
+    alpha: number,
     rotation: number,
     mask: {
         isOn: boolean,

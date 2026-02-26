@@ -27,9 +27,9 @@ export type progressorApiType = {
     start: () => void,
     stop: (shouldCallFinishCallback: boolean) => void,
     updateData: (progressorData: newProgressorDataType) => void,
-    callStartCallback: () => void,
-    callFinishCallback: () => void,
-    callUpdateCallback: <callbackDataType>(callbackData: callbackDataType) => void,
+    callStartCallback: <callbackDataType>(callbackData?: callbackDataType) => void,
+    callFinishCallback: <callbackDataType>(callbackData?: callbackDataType) => void,
+    callUpdateCallback: <callbackDataType>(callbackData?: callbackDataType) => void,
 }
 
 export type progressorType = progressorStateType & progressorApiType;
@@ -65,25 +65,25 @@ export const progressorsManager = (() => {
             }
         },
 
-        callStartCallback: function(): void {
+        callStartCallback: function<callbackDataType>(callbackData?: callbackDataType): void {
 
             if (this.startCallback === null) return;
 
-            this.startCallback();
+            this.startCallback(callbackData);
         },
 
         callUpdateCallback: function<callbackDataType>(callbackData?: callbackDataType): void {
 
             if (this.updateCallback === null) return;
 
-            this.updateCallback();
+            this.updateCallback(callbackData);
         },
 
-        callFinishCallback: function(): void {
+        callFinishCallback: function<callbackDataType>(callbackData?: callbackDataType): void {
 
             if (this.finishCallback === null) return;
 
-            this.finishCallback();
+            this.finishCallback(callbackData);
         },
 
         updateData: function(progressorData: newProgressorDataType): void {
