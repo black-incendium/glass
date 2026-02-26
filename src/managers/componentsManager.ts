@@ -1,6 +1,7 @@
+import { basicGraphicsApi, getbasicGraphicsInitState } from "../componentCreation/basicGraphicsCreation.js";
 import { containerApi, getContainerInitState } from "../componentCreation/containerCreation.js";
 import { getSpriteInitState, spriteApi } from "../componentCreation/spriteCreation.js";
-import { anyComponentInitDataType, anyComponentType, containerType } from "../types/componentCreationTypes.js";
+import { anyComponentInitDataType, anyComponentType, basicGraphicsType, containerType, spriteType } from "../types/componentCreationTypes.js";
 
 export const componentsManager = (()=>{
 
@@ -10,7 +11,7 @@ export const componentsManager = (()=>{
 
     const createNewComponent = (() => {
 
-        function createFunction(initData: anyComponentInitDataType): anyComponentType | null {
+        function createFunction<T extends anyComponentInitDataType>(initData: T): Extract<anyComponentType, { type: T["type"] }> | null {
 
             if (components[initData.id]  !== undefined) {
 
@@ -24,17 +25,27 @@ export const componentsManager = (()=>{
                 //? todo: wrong data + common
             })?.filter(el => el !== null) ?? [];
 
-            let resultObject = null;
+            let resultObject: anyComponentType;
 
             switch (initData.type)  {
 
-                case "container":
-                    resultObject = Object.assign(Object.create(containerApi), getContainerInitState(initData), {children: children, parent: null});
-                break;
+                case "container": {
+                    resultObject = Object.assign(Object.create(containerApi), getContainerInitState(initData), {children: children, parent: null}) as containerType;
+                    // return resultObject as Extract<anyComponentType, { type: T["type"] }>;
+                    break;
+                }
+                    
+                case "sprite": {
+                    resultObject = Object.assign(Object.create(spriteApi), getSpriteInitState(initData), {children: children, parent: null}) as spriteType;
+                    // return resultObject as Extract<anyComponentType, { type: T["type"] }>;
+                    break;
+                }
 
-                case "sprite":
-                    resultObject = Object.assign(Object.create(spriteApi), getSpriteInitState(initData), {children: children, parent: null});
-                break;
+                case "basicGraphics": {
+                    resultObject = Object.assign(Object.create(basicGraphicsApi), getbasicGraphicsInitState(initData), {children: children, parent: null}) as basicGraphicsType;
+                    // return resultObject as Extract<anyComponentType, { type: T["type"] }>;
+                    break;
+                }
             }
 
             children.forEach(child => {
@@ -43,7 +54,17 @@ export const componentsManager = (()=>{
 
             components[initData.id] = resultObject;
 
-            return resultObject
+            switch (resultObject.type)  {
+
+                case "container": 
+                    return resultObject as Extract<anyComponentType, { type: T["type"] }>;
+
+                case "sprite": 
+                    return resultObject as Extract<anyComponentType, { type: T["type"] }>;
+
+                case "basicGraphics": 
+                    return resultObject as Extract<anyComponentType, { type: T["type"] }>;
+            }
         }
 
         return createFunction

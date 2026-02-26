@@ -23,6 +23,8 @@ export const renderer = (() => {
     let opacityLocation: WebGLUniformLocation;
     let textureLocation: WebGLUniformLocation;
     let textureMatrixLocation: WebGLUniformLocation;
+    let useColorLocation: WebGLUniformLocation;
+    let colorLocation: WebGLUniformLocation;
     let root: containerType;
     let gameSize: sizeType;
     let gameToClipSpaceScaleData: CoordinatesType;
@@ -67,10 +69,15 @@ export const renderer = (() => {
         uniform sampler2D u_texture;
         uniform float u_opacity;
 
+        uniform vec4 u_color;
+        uniform bool u_useColor;
+
         out vec4 outColor;
 
         void main() {
-            outColor = vec4(texture(u_texture, v_texcoord).xyz, u_opacity);
+            vec4 texColor = texture(u_texture, v_texcoord);
+            vec4 base = u_useColor ? u_color : texColor;
+            outColor = vec4(base.rgb, base.a * u_opacity);
         }
         `;
 
@@ -91,11 +98,15 @@ export const renderer = (() => {
         const opacityLocationRaw = gl.getUniformLocation(program, "u_opacity");
         const textureLocationRaw = gl.getUniformLocation(program, "u_texture");
         const textureMatrixLocationRaw = gl.getUniformLocation(program, "u_textureMatrix");
+        const colorLocationRaw = gl.getUniformLocation(program, "u_color");
+        const useColorLocationRaw = gl.getUniformLocation(program, "u_useColor");
 
         if (matrixLocationRaw !== null) matrixLocation = matrixLocationRaw;
         if (opacityLocationRaw !== null) opacityLocation = opacityLocationRaw;
         if (textureLocationRaw !== null) textureLocation = textureLocationRaw;
         if (textureMatrixLocationRaw !== null) textureMatrixLocation = textureMatrixLocationRaw;
+        if (colorLocationRaw !== null) colorLocation = colorLocationRaw;
+        if (useColorLocationRaw !== null) useColorLocation = useColorLocationRaw;
 
         const vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
@@ -184,7 +195,7 @@ export const renderer = (() => {
             }
         });
 
-        if (component.type == 'sprite') {
+        if (component.type === 'sprite') {
 
             if (componentParentMask.isOn === true) {
 
@@ -205,7 +216,7 @@ export const renderer = (() => {
                 gl.activeTexture(gl.TEXTURE0 + textureUnit);
                 gl.bindTexture(gl.TEXTURE_2D, textureInfo!.texture);
 
-                gl.uniform1f(opacityLocation, 1.0);
+                gl.uniform1f(opacityLocation, 1.0); //why doesnt it take the alpha from the component?
 
                 gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
                     m3.getScalingMatrix(componentParentMask.width, componentParentMask.height), 
@@ -216,7 +227,7 @@ export const renderer = (() => {
 
                 const offset = 0;
                 const count = 4;
-                gl.drawArrays(gl.TRIANGLE_FAN, offset, count);
+                gl.drawArrays(gl.TRIANGLE_FAN, offset, count); //why 2 calls with mask?
                 // gl.depthMask(true);
                 gl.colorMask(true, true, true, true);
             }
@@ -242,6 +253,7 @@ export const renderer = (() => {
             gl.bindTexture(gl.TEXTURE_2D, textureInfo.texture);
 
             gl.uniform1f(opacityLocation, component.getTotalAlpha());
+            gl.uniform1i(useColorLocation, 0);
 
             gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
                 m3.getScalingMatrix(textureInfo.width, textureInfo.height), 
@@ -260,6 +272,65 @@ export const renderer = (() => {
             gl.drawArrays(gl.TRIANGLE_FAN, offset, count);
 
             gl.disable(gl.STENCIL_TEST);
+        }
+
+        if (component.type === 'basicGraphics') {
+
+            const graphicsData = component.getGraphicsData()
+            const r = graphicsData.r;
+            const g = graphicsData.g;
+            const b = graphicsData.b;
+            const a = graphicsData.a;
+            const width = graphicsData.width;
+            const height = graphicsData.height;
+
+            if (componentParentMask.isOn === true) {
+
+                gl.enable(gl.STENCIL_TEST);
+
+                gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+
+                gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+                gl.stencilMask(0xff);
+                // gl.depthMask(false);
+                gl.colorMask(false, false, false, false);
+
+                gl.uniform1i(useColorLocation, 1);
+                gl.uniform4f(colorLocation, r, g, b, a);
+                gl.uniform1f(opacityLocation, 1.0);
+
+                gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
+                    m3.getScalingMatrix(componentParentMask.width, componentParentMask.height), 
+                    componentMaskTransformationsMatrix,
+                    m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
+                    m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
+                ]));
+
+                const offset = 0;
+                const count = 4;
+                gl.drawArrays(gl.TRIANGLE_FAN, offset, count);
+                // gl.depthMask(true);
+                gl.colorMask(true, true, true, true);
+            }
+
+            gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+            gl.stencilFunc(gl.EQUAL, 1, 0xff);
+            gl.stencilMask(0x00);
+
+            gl.uniform1i(useColorLocation, 1);
+            gl.uniform4f(colorLocation, r, g, b, a);
+            gl.uniform1f(opacityLocation, component.getTotalAlpha());
+
+            gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
+                m3.getScalingMatrix(width, height),
+                componentTransformationsMatrix,
+                m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
+                m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
+            ]));
+
+            const offset = 0;
+            const count = 4;
+            gl.drawArrays(gl.TRIANGLE_FAN, offset, count);
         }
 
         matrixStack.push(componentTransformationsMatrix);

@@ -8,6 +8,7 @@ import { eventsManager } from './managers/eventsManager.js';
 import { assetsManagerEventsData } from './eventsData/assetsManagerEventsData.js';
 import { anyComponentInitDataType } from './types/componentCreationTypes.js';
 
+export { componentsManager } from './managers/componentsManager.js';
 export { eventsManager } from './managers/eventsManager.js';
 export { rendererEventsData } from './eventsData/rendererEventsData.js';
 export type { anyComponentInitDataType } from './types/componentCreationTypes.js';

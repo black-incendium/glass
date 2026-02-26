@@ -1,18 +1,27 @@
+import { basicGraphicsDataType } from "../componentCreation/basicGraphicsCreation.js";
+
 export type componentsRegistryType = {
 
     container: {
-        init: containerInitDataType
-        state: containerStateType
-        api: containerApiType
-        instance: containerType
-    }
+        init: containerInitDataType,
+        state: containerStateType,
+        api: containerApiType,
+        instance: containerType,
+    },
 
     sprite: {
-        init: spriteInitDataType
-        state: spriteStateType
-        api: spriteApiType
-        instance: spriteType
-    }
+        init: spriteInitDataType,
+        state: spriteStateType,
+        api: spriteApiType,
+        instance: spriteType,
+    },
+
+    basicGraphics: {
+        init: basicGraphicsInitDataType,
+        state: basicGraphicsStateType,
+        api: basicGraphicsApiType,
+        instance: basicGraphicsType,
+    },
 }
 
 export type componentsRegisteryKeyType = keyof componentsRegistryType;
@@ -21,7 +30,9 @@ export type componentInitDataType<K extends componentsRegisteryKeyType> = compon
 export type componentInstanceType<K extends componentsRegisteryKeyType> = componentsRegistryType[K]["instance"];
 export type componentStateType<K extends componentsRegisteryKeyType> = componentsRegistryType[K]["state"];
 
-// -------------------BASE---------------------------
+
+// ---------------------------------------- BASE DATA ----------------------------------------------
+
 export type baseInitDataType = {
 
     id: string,
@@ -101,7 +112,7 @@ export type containerApiType = baseApiType & {
 
 export type containerType = containerApiType & containerStateType;
 
-// ----------------------------------------SPRITE----------------------------------------------------
+// ---------------------------------------- SPRITE ----------------------------------------------
 
 export type spriteInitDataType = baseInitDataType & {
 
@@ -124,5 +135,38 @@ export type spriteApiType = baseApiType & {
 
 export type spriteType = spriteApiType & spriteStateType;
 
-export type anyComponentType = containerType | spriteType
-export type anyComponentInitDataType =  containerInitDataType | spriteInitDataType
+// ---------------------------------------- BASIC GRAPHICS ----------------------------------------------
+
+export type basicGraphicsInitDataType = baseInitDataType & {
+
+    type: 'basicGraphics',
+    r?: number,
+    g?: number,
+    b?: number,
+    a?: number,
+    width?: number,
+    height?: number,
+};
+
+export type basicGraphicsStateType = baseStateType & {
+
+    type: 'basicGraphics',
+    r: number,
+    g: number,
+    b: number,
+    a: number,
+    width: number,
+    height: number,
+}
+
+export type basicGraphicsApiType = baseApiType & {
+
+    getGraphicsData:  () => basicGraphicsDataType
+}
+
+export type basicGraphicsType = basicGraphicsApiType & basicGraphicsStateType;
+
+// ---------------------------------------- ANY COMPONENT ----------------------------------------------
+
+export type anyComponentType = containerType | spriteType | basicGraphicsType;
+export type anyComponentInitDataType =  containerInitDataType | spriteInitDataType| basicGraphicsInitDataType;
