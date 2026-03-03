@@ -1,11 +1,11 @@
 export type newProgressorDataType = {
 
-    startValue: number,
-    targetValue: number,
-    duration: number,
-    startCallback: Function | null,
-    updateCallback: Function | null,
-    finishCallback: Function | null,
+    startValue?: number,
+    targetValue?: number,
+    duration?: number,
+    startCallback?: Function | null,
+    updateCallback?: Function | null,
+    finishCallback?: Function | null,
 }
 
 export type progressorStateType = {
@@ -131,12 +131,12 @@ export const progressorsManager = (() => {
 
             progressor.currentValue = progressor.startValue * (1 - progress) + progressor.targetValue * progress;
 
+            progressor.callUpdateCallback<number>(progressor.currentValue);
+
             if (progressor.timeElapsedSinceStart === progressor.duration) {
 
                 progressor.stop(true);
             }
-
-            progressor.callUpdateCallback<number>(progressor.currentValue);
         });
     }
 

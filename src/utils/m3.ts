@@ -118,6 +118,7 @@ export const m3 = (()=>{
         getTranslationMatrix,
         multiplyTwoMatrices,
         multiplyMatrices,
+        getOriginRotationMatrix,
         getComponentTransformationsMatrix
     }
 })()

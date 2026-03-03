@@ -1,9 +1,9 @@
-type eventType = {
+export type eventType = {
     name: string,
     callbackData?: Record<string, any>,
 }
 
-type eventListenerType = {
+export type eventListenerType = {
 
     eventName: string,
     id: Symbol,
@@ -17,13 +17,13 @@ export const eventsManager = (()=>{
 
     let eventListeners: eventListenerType[] = [];
 
-    function fireEvent(event: eventType): void {
+    function fireEvent<eventDataType>(event: eventType, eventData?: eventDataType): void {
 
         [...eventListeners].forEach(eventListener => {
 
             if (eventListener.eventName === event.name) {
 
-                eventListener.callback(event);
+                eventListener.callback(event, eventData);
 
                 if (eventListener.options.oneTime === true) {
 
@@ -52,11 +52,17 @@ export const eventsManager = (()=>{
         eventListeners = eventListeners.filter(eventListener => eventListener.id !== eventListenerId);
     }
 
+    function getEventListeners() {
+
+        return eventListeners;
+    }
+
     return {
 
         fireEvent,
         addEventListener,
-        removeEventListener
+        removeEventListener,
+        getEventListeners
     }
 
 })();

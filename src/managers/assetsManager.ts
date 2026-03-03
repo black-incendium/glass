@@ -1,4 +1,5 @@
 import { assetsManagerEventsData } from "../eventsData/assetsManagerEventsData.js";
+import { mathUtils } from "../utils/mathUtils.js";
 import { eventsManager } from "./eventsManager.js";
 
 export type assetType = {
@@ -14,6 +15,11 @@ export type assetType = {
             x: number,
             y: number
         },
+        rotation: number,
+        rotationCalculationTranslation: {
+            x: number,
+            y: number
+        }
     }
 };
 
@@ -42,6 +48,7 @@ export type spritesheetDataType = {
         height:number,
         x:number,
         y:number
+        rotation: number
     }[]
 };
 
@@ -94,14 +101,12 @@ export const assetsManager = (() => {
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.generateMipmap(gl.TEXTURE_2D);
 
         const img = new Image();
         img.addEventListener('load', function() {
 
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-            gl.generateMipmap(gl.TEXTURE_2D);
 
             assets[assetName] = {
                 texture,
@@ -116,6 +121,11 @@ export const assetsManager = (() => {
                         x: 1,
                         y: 1
                     },
+                    rotationCalculationTranslation: {
+                        x: 0,
+                        y: 0
+                    },
+                    rotation: 0,
                 }
             };
 
@@ -137,14 +147,12 @@ export const assetsManager = (() => {
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.generateMipmap(gl.TEXTURE_2D);
 
         const img = new Image();    
         img.addEventListener('load', function() {
 
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-            gl.generateMipmap(gl.TEXTURE_2D);
 
             fetch(spritesheetJsonUrl)
                 .then(response => response.json())
@@ -167,9 +175,14 @@ export const assetsManager = (() => {
                                     y: spriteData.y / img.height
                                 },
                                 scale: {
-                                    x: spriteData.width / img.width,
-                                    y: spriteData.height / img.height
+                                    x: (spriteData.width - 0.01) / img.width,
+                                    y: (spriteData.height - 0.01) / img.height
                                 },
+                                rotationCalculationTranslation:  {
+                                    x: (spriteData.width / 2) / img.width,
+                                    y: (spriteData.height / 2) / img.height
+                                },
+                                rotation: mathUtils.getRadiansFromDegrees(spriteData.rotation ?? 0)
                             }
                         };
 

@@ -1,14 +1,15 @@
 import { rendererUtils } from '../utils/rendererUtils.js';
 import { m3 } from '../utils/m3.js';
 import { assetsManager } from "./assetsManager.js";
-import { gameState } from './gameState.js';
+import { appStateManager } from './appStateManager.js';
 import { componentsManager } from './componentsManager.js';
 import { resizeManager } from './resizeManager.js';
 import { progressorsManager } from './progressorsManager.js';
 import { eventsManager } from './eventsManager.js';
 import { rendererEventsData } from '../eventsData/rendererEventsData.js';
-import { CoordinatesType, sizeType } from '../types/globalTypes.js';
+import { coordinatesType, sizeType } from '../types/globalTypes.js';
 import { anyComponentType, containerType } from '../types/componentCreationTypes.js';
+import { inputManager } from './inputManager.js';
 
 type rendererMatrix = [
    number, number, number, 
@@ -26,8 +27,8 @@ export const renderer = (() => {
     let useColorLocation: WebGLUniformLocation;
     let colorLocation: WebGLUniformLocation;
     let root: containerType;
-    let gameSize: sizeType;
-    let gameToClipSpaceScaleData: CoordinatesType;
+    let appSize: sizeType;
+    let appToClipSpaceScaleData: coordinatesType;
     let texcoordBuffer: WebGLBuffer;
     let matrixStack: rendererMatrix[] = [];
     let previousRenderTime: number;
@@ -221,8 +222,8 @@ export const renderer = (() => {
                 gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
                     m3.getScalingMatrix(componentParentMask.width, componentParentMask.height), 
                     componentMaskTransformationsMatrix,
-                    m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
-                    m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
+                    m3.getTranslationMatrix(-appSize.width/2,-appSize.height/2),
+                    m3.getScalingMatrix(appToClipSpaceScaleData.x, appToClipSpaceScaleData.y)
                 ]));
 
                 const offset = 0;
@@ -258,14 +259,16 @@ export const renderer = (() => {
             gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
                 m3.getScalingMatrix(textureInfo.width, textureInfo.height), 
                 componentTransformationsMatrix,
-                m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
-                m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
+                m3.getTranslationMatrix(-appSize.width/2,-appSize.height/2),
+                m3.getScalingMatrix(appToClipSpaceScaleData.x, appToClipSpaceScaleData.y)
             ]));
 
-            gl.uniformMatrix3fv(textureMatrixLocation, false, m3.multiplyTwoMatrices(
+            gl.uniformMatrix3fv(textureMatrixLocation, false, m3.multiplyMatrices([
                 m3.getScalingMatrix(textureMatricesData.scale.x, textureMatricesData.scale.y),
-                m3.getTranslationMatrix(textureMatricesData.translation.x, textureMatricesData.translation.y)
-            ));
+                m3.getTranslationMatrix(-textureMatricesData.rotationCalculationTranslation.x, -textureMatricesData.rotationCalculationTranslation.y),
+                m3.getOriginRotationMatrix(textureMatricesData.rotation),
+                m3.getTranslationMatrix(textureMatricesData.translation.x + textureMatricesData.rotationCalculationTranslation.x, textureMatricesData.translation.y + textureMatricesData.rotationCalculationTranslation.y),
+            ]));
 
             const offset = 0;
             const count = 4;
@@ -302,8 +305,8 @@ export const renderer = (() => {
                 gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
                     m3.getScalingMatrix(componentParentMask.width, componentParentMask.height), 
                     componentMaskTransformationsMatrix,
-                    m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
-                    m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
+                    m3.getTranslationMatrix(-appSize.width/2,-appSize.height/2),
+                    m3.getScalingMatrix(appToClipSpaceScaleData.x, appToClipSpaceScaleData.y)
                 ]));
 
                 const offset = 0;
@@ -324,8 +327,8 @@ export const renderer = (() => {
             gl.uniformMatrix3fv(matrixLocation, false, m3.multiplyMatrices([
                 m3.getScalingMatrix(width, height),
                 componentTransformationsMatrix,
-                m3.getTranslationMatrix(-gameSize.width/2,-gameSize.height/2),
-                m3.getScalingMatrix(gameToClipSpaceScaleData.x, gameToClipSpaceScaleData.y)
+                m3.getTranslationMatrix(-appSize.width/2,-appSize.height/2),
+                m3.getScalingMatrix(appToClipSpaceScaleData.x, appToClipSpaceScaleData.y)
             ]));
 
             const offset = 0;
@@ -349,18 +352,19 @@ export const renderer = (() => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
         const canvasSize = resizeManager.getCanvasSize();
-        gameSize = gameState.getGameSize();
-        gameToClipSpaceScaleData = canvasSize.width/canvasSize.height < gameSize.width/gameSize.height ? {
+        appSize = appStateManager.getAppSize();
+        appToClipSpaceScaleData = canvasSize.width/canvasSize.height < appSize.width/appSize.height ? {
 
-            x: 2/gameSize.width,
-            y: 2/gameSize.width * canvasSize.width/canvasSize.height
+            x: 2/appSize.width,
+            y: 2/appSize.width * canvasSize.width/canvasSize.height
         } : {
 
-            x: 2/gameSize.height * canvasSize.height/canvasSize.width,
-            y: 2/gameSize.height
+            x: 2/appSize.height * canvasSize.height/canvasSize.width,
+            y: 2/appSize.height
         };
 
         progressorsManager.updateProgressors(time - previousRenderTime);
+        inputManager.updateFrame();
 
         root.children?.forEach(children => {
             
